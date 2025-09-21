@@ -1,0 +1,19 @@
+.confirmation-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 60vh;
+}
+.confirmation-content h2 {
+    font-size: 4rem;
+}
+.confirmation-content h1 {
+  margin-bottom: 1rem;
+}
+.confirmation-content p {
+  margin-bottom: 0.5rem;
+}
+.confirmation-content button {
+  margin-top: 2rem;
+}

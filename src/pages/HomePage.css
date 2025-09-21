@@ -1,0 +1,497 @@
+/* --- HERO SECTION STYLES --- */
+.hero-section {
+  background-color: var(--light-color);
+  padding-top: 40px;
+  padding-bottom: 10px;
+}
+
+.hero-section .container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.hero-content {
+  flex: 1; /* Take up available space */
+  max-width: 500px;
+}
+
+.hero-image-container {
+  flex: 1; /* Take up available space */
+  max-width: 50%;
+  max-height: 380px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-image-container img {
+  width: 100%;
+  height: 380px;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.hero-pre-title {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+.hero-pre-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='4' viewBox='0 0 100 4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 2C10 4 20 0 30 2C40 4 50 0 60 2C70 4 80 0 90 2C100 4 100 2 100 2' stroke='%230073e6' stroke-width='3'/%3E%3C/svg%3E%0A");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.hero-title {
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: var(--secondary-color);
+  margin: 8px 0;
+  line-height: 1.1;
+}
+
+.hero-description {
+  font-size: 1rem;
+  margin-bottom: 25px;
+  color: var(--text-color);
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+
+/* --- PROMO GRID & OTHER SECTIONS --- */
+.featured-products {
+  padding-top: 60px;
+}
+
+.featured-products h2 {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  font-size: 2.2rem;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+/* Brands Section Styles */
+.brands-section {
+  padding: 40px 0;
+  background-color: var(--light-color);
+  overflow-x: hidden;
+}
+
+.logo-carousel-container {
+  width: 100%;
+}
+
+.logo-carousel {
+  display: flex;
+  animation: scroll 30s linear infinite;
+}
+
+.logo-carousel img {
+  height: 60px;
+  margin: 0 40px;
+  filter: grayscale(1);
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.logo-carousel img:hover {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.product-tabs {
+  display: flex;
+  gap: 20px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.promo-banners-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 60px 20px;
+}
+
+.promo-banner {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  display: block;
+  height: 250px;
+}
+
+.promo-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.promo-banner:hover img {
+  transform: scale(1.05);
+}
+
+.promo-banner-content {
+  position: absolute;
+  top: 50%;
+  left: 35px;
+  transform: translateY(-50%);
+  color: #fff;
+  z-index: 2;
+}
+
+.promo-banner-content p {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.promo-banner-content h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 5px 0 10px;
+}
+
+.promo-banner-content span {
+  font-weight: 600;
+  font-size: 1rem;
+  display: block;
+}
+
+.promo-banner-content span strong {
+  font-size: 1.2rem;
+}
+
+.promo-banner-content .shop-now-link {
+  margin-top: 15px;
+  border-bottom: 2px solid #fff;
+  padding-bottom: 2px;
+  display: inline-block; /* So border only wraps the text */
+}
+
+/* Add a dark overlay on the images for text readability */
+.promo-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%);
+  z-index: 1;
+  transition: background 0.3s ease;
+}
+
+/* --- CATEGORY BANNERS STYLES (MATCHING IMAGE) --- */
+.category-banners {
+  padding: 40px 0; /* Consistent padding */
+  background-color: var(--light-color); /* Matches background from screenshot */
+}
+
+.category-banners-grid-new {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Two columns: left is 2x wider than right */
+  gap: 30px; /* Space between the main banner and small banners */
+}
+
+/* --- Main Left Banner (Women's Style) --- */
+.main-banner-item {
+  position: relative;
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 480px; 
+  text-decoration: none;
+  color: inherit;
+  background-image: url('https://images.pexels.com/photos/1845208/pexels-photo-1845208.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+  background-size: cover;
+  background-position: center 30%; /* Position the image slightly up */
+  
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Push content to the right */
+  padding: 40px;
+}
+
+.main-banner-item img {
+  height: 100%; /* Image fills the height */
+  width: auto; /* Width adjusts to maintain aspect ratio */
+  object-fit: cover;
+  border-radius: 10px 0 0 10px; /* Rounded corners only on the left */
+  /* This value is crucial to align the image on the left side of the container */
+  margin-left: -5%; /* Pull image slightly out of bounds to crop as per design */
+}
+
+.main-banner-content {
+  text-align: left;
+  z-index: 2;
+  max-width: 40%;
+  color: var(--secondary-color); /* Dark text for readability */
+}
+
+.main-banner-content .subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-color); /* Blue for subtitle */
+  margin-bottom: 5px;
+  display: block;
+}
+
+.main-banner-content h3 {
+  font-size: 3rem; /* Large font for main title */
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.main-banner-content p {
+  font-size: 1.1rem;
+  margin-top: 10px;
+  color: var(--text-color);
+}
+
+.banner-shop-btn {
+  background-color: transparent;
+  border: 2px solid #ccc;
+  color: var(--secondary-color);
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 25px;
+  transition: all 0.3s ease;
+}
+
+.banner-shop-btn:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+
+/* --- Right Column with Small Banners --- */
+.small-banners-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns for top small banners */
+  grid-template-rows: 1fr 1fr; /* Two rows: top pair, bottom single */
+  gap: 30px; /* Gap between small banners */
+}
+
+.small-banner-item {
+  position: relative;
+  display: block;
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 225px; /* Consistent height for small banners */
+  text-decoration: none;
+  color: inherit;
+}
+
+.small-banner-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.small-banner-item:hover img {
+  transform: scale(1.05);
+}
+
+.small-banner-content {
+  position: absolute;
+  top: 50%;
+  left: 25px;
+  transform: translateY(-50%);
+  color: #fff;
+  z-index: 2;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.small-banner-item.large-bottom-banner {
+  grid-column: span 2; /* This banner spans both columns */
+  height: 225px; /* Same height as top small banners */
+}
+
+/* Specific styles for Handbag and Watch banners (top small ones) */
+.small-banner-item:nth-child(1) .small-banner-content, /* Handbag */
+.small-banner-item:nth-child(2) .small-banner-content { /* Watch */
+  color: #fff; /* Dark text */
+}
+
+/* Specific style for Backpack banner (bottom large one) */
+.small-banner-item.large-bottom-banner .small-banner-content {
+  color: #fff; /* White text for the backpack banner */
+}
+
+
+.small-banner-content .discount-badge {
+  position: absolute;
+  top: -30px; /* Position above content */
+  left: 0;
+  background-color: var(--primary-color);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.small-banner-content .subtitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.small-banner-content h4 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.small-banner-content p {
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.shop-now-text {
+  font-weight: 600;
+  border-bottom: 2px solid; /* Border color will inherit from parent */
+  padding-bottom: 2px;
+  display: inline-block;
+  margin-top: 10px;
+  transition: border-bottom-color 0.3s ease;
+}
+
+.shop-now-text .arrow {
+  margin-left: 5px;
+}
+
+/* Overlay for images to darken for text readability */
+.small-banner-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0); /* Default no overlay */
+  z-index: 1;
+  transition: background 0.3s ease;
+}
+
+/* Overlay specific to the Backpack banner to make text white and readable */
+.small-banner-item.large-bottom-banner::before {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+
+/* --- Responsive adjustments for the banner grid --- */
+@media (max-width: 992px) {
+  .category-banners-grid-new {
+    grid-template-columns: 1fr; /* Stack on smaller screens */
+    gap: 20px;
+  }
+
+  .main-banner-item {
+    height: 380px; /* Adjust height for single column */
+    justify-content: center; /* Center content horizontally when stacked */
+    text-align: center;
+  }
+
+  .main-banner-item img {
+    margin-left: 0; /* No need to pull out */
+    width: 100%;
+    border-radius: 10px;
+    opacity: 0.7; /* Darken image a bit when content is centered over it */
+  }
+
+  .main-banner-content {
+    position: relative; /* Position content over image */
+    right: auto;
+    left: auto;
+    transform: none;
+    padding: 20px; /* Add some padding */
+    width: 100%;
+  }
+
+  .small-banners-column {
+    grid-template-columns: 1fr; /* Stack small banners on very small screens */
+    grid-template-rows: auto;
+  }
+
+  .small-banner-item {
+    height: 180px; /* Adjust height for small banners */
+  }
+
+  .small-banner-item.large-bottom-banner {
+    grid-column: span 1; /* Reset span for small screens */
+  }
+}
+
+@media (max-width: 576px) {
+  .main-banner-content h3 {
+    font-size: 2.5rem;
+  }
+}
