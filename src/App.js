@@ -16,6 +16,11 @@ import ReturnsPage from './pages/ReturnsPage';
 import ContactPage from './pages/ContactPage';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
+import PrivateRoute from './components/PrivateRoute';
+import ProfilePage from './pages/ProfilePage';
+import SellerRoute from './components/SellerRoute';
+import AddProductPage from './pages/AddProductPage';
+import MyProductsPage from './pages/MyProductsPage';
 import './App.css';
 
 function App() {
@@ -36,6 +41,19 @@ function App() {
           <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <ProfilePage />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/add-product" element={
+            <SellerRoute>
+              <AddProductPage />
+            </SellerRoute>
+          } />
+          <Route path="/dashboard/my-products" element={
+            <SellerRoute><MyProductsPage /></SellerRoute>
+          } />
         </Routes>
       </main>
       <Footer />

@@ -60,9 +60,34 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
     navigate('/login');
   };
+   const becomeSeller = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/users/become-seller', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token, // Send the auth token
+        },
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        // const updatedUser = { ...currentUser, isSeller: true };
+        setCurrentUser(data.User);
+        localStorage.setItem('user', JSON.stringify(data.User));
+        return true;
+      } else {
+        console.error(data.msg);
+        return false;
+      }
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ currentUser, token, register, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, token, register, login, logout, becomeSeller }}>
       {children}
     </AuthContext.Provider>
   );

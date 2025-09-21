@@ -84,15 +84,29 @@ const Navbar = () => {
             </form>
 
             <div className="navbar-icons">
-              <button className="icon-btn">🔍</button>
-               {currentUser ? (
-                <>
-                  <span className="navbar-user-name">Hi, {currentUser.name}</span>
-                  <button onClick={logout} className="navbar-logout-btn">Logout</button>
-                </>
-              ) : (
-              <Link to="/login" className="icon-btn">👤</Link>
-              )}
+              <div className="nav-icon profile-menu-container" ref={dropdownRef}>
+                <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="icon-btn">
+                  👤
+                </button>
+                {isDropdownOpen && (
+                  <div className="profile-dropdown">
+                    {currentUser ? (
+                      <>
+                        <div className="dropdown-header">Hello, {currentUser.name}</div>
+                        <Link to="/profile" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>My Profile</Link>
+                        <button onClick={() => { logout(); setIsDropdownOpen(false); }} className="dropdown-item dropdown-button">Logout</button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="dropdown-header">Welcome</div>
+                        <Link to="/login" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                          <button className="dropdown-login-btn">Login / Sign Up</button>
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
               <Link to="/cart" className="icon-btn cart-icon">
                 🛒
                 {cartCount > 0 && <span className="cart-count">{cartCount}</span>}

@@ -10,6 +10,7 @@ const productSchema = new Schema({
   category: { type: String, required: true },
   rating: { type: Number, required: true },
   brand: { type: String, required: true },
+   seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 }, {
   timestamps: true, // Automatically adds 'createdAt' and 'updatedAt' fields
 });

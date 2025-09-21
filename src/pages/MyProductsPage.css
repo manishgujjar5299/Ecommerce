@@ -1,0 +1,54 @@
+.my-products-page .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.add-product-btn {
+  font-size: 0.9rem;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.products-table th, .products-table td {
+  border-bottom: 1px solid var(--border-color);
+  padding: 15px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.products-table th {
+  font-weight: 600;
+}
+
+.product-table-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.action-btn-edit, .action-btn-delete {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 5px;
+  font-size: 0.8rem;
+}
+
+.action-btn-edit {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.action-btn-delete {
+  background-color: #dc3545;
+  color: white;
+}
