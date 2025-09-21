@@ -134,3 +134,54 @@
   background-color: var(--primary-color);
   color: #fff;
 }
+
+/* Add these styles to the end of Navbar.css */
+
+.profile-menu-container {
+  position: relative;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 150%; /* Position it below the icon */
+  right: 0;
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  width: 200px;
+  z-index: 1001;
+  padding: 10px 0;
+  border: 1px solid #eee;
+}
+
+.dropdown-header {
+  padding: 10px 15px;
+  font-weight: 600;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 5px;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 15px;
+  text-align: left;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: var(--light-color);
+}
+
+.dropdown-button {
+  font-family: var(--font-family);
+}
+
+.dropdown-login-btn {
+  width: 100%;
+  padding: 10px;
+}

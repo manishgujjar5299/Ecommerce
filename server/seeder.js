@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Product = require('./models/product.model');
+const User = require('./models/user.model');
 
-const products = [
+const SELLER_USER_ID = '68cfdf5929882f6250e7cd15';
+
+const productsToSeed = [
   {
     id: 1,
     name: 'Classic Leather Watch',
@@ -341,10 +344,21 @@ const importData = async () => {
     await mongoose.connect(uri);
     console.log("DB connected for seeding.");
 
+    const seller = await User.findById(SELLER_USER_ID);
+    if (!seller) {
+      console.error('Error: Seller user not found. Please check the SELLER_USER_ID.');
+      process.exit(1);
+    }
+    
+    // Add the seller's ID to every product
+    const productsWithSeller = productsToSeed.map(product => ({
+      ...product,
+      seller: seller._id,
+    }));
     await Product.deleteMany(); // Clear existing products
     console.log("Old products cleared.");
     
-    await Product.insertMany(products); // Insert new products
+    await Product.insertMany(productsWithSeller); // Insert new products
     console.log('Data Imported Successfully! ✅');
     process.exit();
   } catch (error) {
