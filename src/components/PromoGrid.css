@@ -1,0 +1,54 @@
+.promo-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 40px 0;
+}
+
+.promo-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  padding: 20px;
+}
+
+.promo-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.promo-card-header h3 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.promo-card-header a {
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.promo-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.promo-item-link {
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+.promo-item-link img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  margin-bottom: 8px;
+}
+
+.promo-item-link span {
+  font-size: 0.85rem;
+}

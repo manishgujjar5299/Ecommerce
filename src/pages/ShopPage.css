@@ -1,0 +1,29 @@
+.shop-page h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.filters {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: var(--border-radius);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-weight: bold;
+}
+
+.filter-group select {
+    padding: 8px;
+    border-radius: var(--border-radius);
+    border: 1px solid #ccc;
+}
