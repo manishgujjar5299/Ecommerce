@@ -23,21 +23,21 @@ const CartPage = () => {
       <h1>Your Cart</h1>
       <div className="cart-items">
         {cartItems.map((item) => (
-          <div key={item.id} className="cart-item">
+          <div key={item._id} className="cart-item">
             <img src={item.image} alt={item.name} />
             <div className="item-details">
               <h3>{item.name}</h3>
               <p>${item.price.toFixed(2)}</p>
             </div>
             <div className="item-quantity">
-              <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+              <button onClick={() => updateQuantity(item._id, item.quantity - 1)}>-</button>
               <span>{item.quantity}</span>
-              <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+              <button onClick={() => updateQuantity(item._id, item.quantity + 1)}>+</button>
             </div>
             <div className="item-total">
               ${(item.price * item.quantity).toFixed(2)}
             </div>
-            <button onClick={() => removeFromCart(item.id)} className="remove-btn">
+            <button onClick={() => removeFromCart(item._id)} className="remove-btn">
               &times;
             </button>
           </div>

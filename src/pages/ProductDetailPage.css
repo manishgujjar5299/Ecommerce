@@ -1,37 +1,121 @@
-.product-detail-layout {
+.product-detail-main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
-  margin-top: 2rem;
+  margin-bottom: 4rem;
 }
 
 .product-detail-image img {
   width: 100%;
   border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
 }
 
 .product-detail-info h1 {
-    font-size: 2.5rem;
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+}
+
+.product-detail-info .product-rating {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #f5b327;
+}
+
+.product-detail-info .product-rating span {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  margin-left: 10px;
 }
 
 .product-detail-info .product-price {
-    font-size: 2rem;
-    color: var(--primary-color);
-    margin: 1rem 0;
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin: 1rem 0;
+  font-weight: 600;
 }
 
-.product-detail-info .product-description {
-    line-height: 1.8;
-    margin-bottom: 2rem;
+.product-detail-info .product-description-short {
+  line-height: 1.8;
+  margin-bottom: 2rem;
 }
 
-.product-detail-info .add-to-cart-btn {
-    padding: 15px 30px;
-    font-size: 1.2rem;
+.add-to-cart-btn-detail {
+  padding: 15px 30px;
+  font-size: 1.1rem;
 }
 
+/* --- Reviews Section --- */
+.product-reviews-section {
+  margin-top: 3rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 2rem;
+}
+
+.product-reviews-section h2 {
+  margin-bottom: 2rem;
+}
+
+.reviews-list {
+  margin-bottom: 3rem;
+}
+
+.review-item {
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.5rem 0;
+}
+
+.review-item strong {
+  font-size: 1.1rem;
+}
+
+.review-rating {
+  color: #f5b327;
+  margin: 5px 0;
+}
+
+.review-date {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+  margin-bottom: 10px;
+}
+
+/* --- Review Form --- */
+.review-form-container {
+  max-width: 600px;
+}
+
+.review-form-container h3 {
+  margin-bottom: 1.5rem;
+}
+
+.review-form-container .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.review-form-container label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.review-form-container select,
+.review-form-container textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-family: var(--font-family);
+}
+
+.review-form-container textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .product-detail-layout {
-        grid-template-columns: 1fr;
-    }
+  .product-detail-main {
+    grid-template-columns: 1fr;
+  }
 }
