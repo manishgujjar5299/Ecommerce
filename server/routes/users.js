@@ -2,6 +2,7 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 let User = require('../models/user.model');
+const auth = require('../middleware/auth');
 
 // --- REGISTRATION ROUTE ---
 router.post('/register', async (req, res) => {
@@ -61,6 +62,29 @@ router.post('/login', async (req, res) => {
       },
     });
 
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/become-seller', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found.' });
+    }
+
+    user.isSeller = true;
+    await user.save();
+
+    res.json({
+      msg: 'Congratulations! You are now a seller.',
+      user: {
+        id: user._id,
+        name: user.name,
+        isSeller: user.isSeller,
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
