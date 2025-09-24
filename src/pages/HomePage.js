@@ -67,20 +67,32 @@ const HomePage = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [tabProducts, setTabProducts] = useState([]);
   const [activeTab, setActiveTab] = useState('New Arrival');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const { addToCart } = useContext(CartContext);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
+       try {
+        setLoading(true);
+        setError('');
         const response = await fetch('http://localhost:5000/api/products');
-        const data = await response.json();
-        setAllProducts(data);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
       }
-    };
+      
+      const data = await response.json();
+      setAllProducts(data);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+      setError(error.message || 'Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  };
     fetchProducts();
   }, []);
 

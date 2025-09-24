@@ -17,7 +17,20 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ['customer', 'seller', 'manufacturer', 'admin'],
+    default: 'customer'
+  },
   isSeller: { type: Boolean, default: false },
+  companyName: { type: String },
+  // companyLogo: { type: String },
+  companyDescription: { type: String },
+  verificationStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  }
 }, {
   timestamps: true,
 });

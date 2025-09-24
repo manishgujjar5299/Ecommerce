@@ -1,24 +1,27 @@
-// Complete products.js route file with ADD product function
-
+// routes/products.js
 const router = require('express').Router();
 const auth = require('../middleware/auth');
+const adminAuth = require('../middleware/adminAuth');
+const manufacturerAuth = require('../middleware/manufacturerAuth');
+
 let Product = require('../models/product.model');
 let User = require('../models/user.model');
 
-// --- GET ALL PRODUCTS (Public Route) ---
-router.route('/').get(async (req, res) => {
+// --- GET ALL APPROVED PRODUCTS (Public Route) ---
+// This is the main shop page route. It only shows products that have been approved by the admin.
+router.get('/', async (req, res) => {
   try {
-    const products = await Product.find().populate('seller', 'name');
+    const products = await Product.find({ status: 'approved' }).populate('seller', 'name companyName');
     res.json(products);
   } catch (err) {
-    res.status(400).json('Error: ' + err);
+    res.status(500).json({ error: err.message });
   }
 });
 
 // --- GET A SINGLE PRODUCT BY ID (Public Route) ---
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('seller', 'name companyName');
     if (product) {
       res.json(product);
     } else {
@@ -29,47 +32,68 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// --- ADD A NEW PRODUCT (Seller-Only Route) ---
-router.post('/add', auth, async (req, res) => {
+// --- GET ALL PRODUCTS FOR ADMIN REVIEW (Protected Admin Route) ---
+// This route is for the admin dashboard to see all products, regardless of status.
+router.get('/all', adminAuth, async (req, res) => {
   try {
-    const { name, price, description, image, category, brand } = req.body;
+    const products = await Product.find().populate('seller', 'name companyName');
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-    // Check if user is a seller
-    const user = await User.findById(req.user);
-    if (!user || !user.isSeller) {
-      return res.status(403).json({ msg: 'Access denied. Only sellers can add products.' });
-    }
-
-    // Create new product
-    const newProduct = new Product({
-      name,
-      price,
-      description,
-      image,
-      category,
-      brand,
-      seller: req.user, // Set the seller to the authenticated user
-    });
-
-    const savedProduct = await newProduct.save();
-    res.status(201).json({
-      msg: 'Product added successfully!',
-      product: savedProduct
-    });
-
+// --- GET PRODUCTS BY SELLER/MANUFACTURER (Protected Route) ---
+// This route is for the manufacturer dashboard to see only their own products.
+router.get('/my-products', auth, async (req, res) => {
+  try {
+    const myProducts = await Product.find({ seller: req.user }).populate('seller', 'name');
+    res.json(myProducts);
   } catch (err) {
-    console.error('Add product error:', err); 
+    console.error('My products error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// --- GET PRODUCTS BY SELLER (Protected Route) ---
-router.get('/my-products', auth, async (req, res) => {
+// --- ADD A NEW PRODUCT (Protected Manufacturer Route) ---
+// Only manufacturers can add products. Added a check for 'manufacturer' role.
+router.post('/add', auth, async (req, res) => {
   try {
-    const products = await Product.find({ seller: req.user }).populate('seller', 'name');
-    res.json(products);
+    const { name, price, description, image, category, brand } = req.body;
+    
+    if (!name || !price || !description || !image || !category || !brand) {
+      return res.status(400).json({ msg: 'All fields are required.' });
+    }
+
+    // The manufacturerAuth middleware already checks for role, but a direct check adds clarity.
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(403).json({ msg: 'User not foumd' });
+    }
+    
+    if (!user.isSeller && user.role !== 'manufacturer' && user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Only sellers/manufacturers can add products' });
+    }
+
+    const newProduct = new Product({
+      name,
+      price: Number(price),
+      description,
+      image,
+      category,
+      brand,
+      seller: req.user,
+      status: 'pending' // Products are 'pending' by default and must be approved by admin.
+    });
+
+    const savedProduct = await newProduct.save();
+    res.status(201).json({
+      msg: 'Product added successfully! Awaiting admin approval.',
+      product: savedProduct
+    });
+
   } catch (err) {
-    console.error('My products error:', err);
+    console.error('Add product error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -81,18 +105,13 @@ router.post('/:id/reviews', auth, async (req, res) => {
     const product = await Product.findById(req.params.id);
 
     if (product) {
-      // Check if the user has already reviewed this product
-      const alreadyReviewed = product.reviews.find(
-        (r) => r.user.toString() === req.user.toString()
-      );
+      const alreadyReviewed = product.reviews.find((r) => r.user.toString() === req.user.toString());
 
       if (alreadyReviewed) {
         return res.status(400).json({ msg: 'Product already reviewed' });
       }
 
-      // Get user's name to store with the review
       const user = await User.findById(req.user);
-
       const review = {
         name: user.name,
         rating: Number(rating),
@@ -104,9 +123,8 @@ router.post('/:id/reviews', auth, async (req, res) => {
 
       // Update the number of reviews and overall rating
       product.numReviews = product.reviews.length;
-      product.rating =
-        product.reviews.reduce((acc, item) => item.rating + acc, 0) /
-        product.reviews.length;
+      const totalRating = product.reviews.reduce((acc, item) => item.rating + acc, 0);
+      product.rating = totalRating / product.reviews.length;
 
       await product.save();
       res.status(201).json({ msg: 'Review added' });
@@ -118,8 +136,8 @@ router.post('/:id/reviews', auth, async (req, res) => {
   }
 });
 
-// --- UPDATE PRODUCT (Seller-Only Route) ---
-router.put('/update/:id', auth, async (req, res) => {
+// --- UPDATE PRODUCT (Protected Manufacturer Route) ---
+router.put('/update/:id', manufacturerAuth, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     
@@ -127,21 +145,18 @@ router.put('/update/:id', auth, async (req, res) => {
       return res.status(404).json({ msg: 'Product not found' });
     }
 
-    // Check if the user is the seller of this product
     if (product.seller.toString() !== req.user.toString()) {
       return res.status(403).json({ msg: 'Access denied. You can only update your own products.' });
     }
 
-    const { name, price, description, image, category, brand } = req.body;
-
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      { name, price, description, image, category, brand },
+      { ...req.body, status: 'pending' }, // Status reverts to pending on update, awaiting re-approval.
       { new: true }
     );
 
     res.json({
-      msg: 'Product updated successfully!',
+      msg: 'Product updated successfully! Awaiting re-approval.',
       product: updatedProduct
     });
 
@@ -150,8 +165,8 @@ router.put('/update/:id', auth, async (req, res) => {
   }
 });
 
-// --- DELETE PRODUCT (Seller-Only Route) ---
-router.delete('/:id', auth, async (req, res) => {
+// --- DELETE PRODUCT (Protected Manufacturer Route) ---
+router.delete('/:id', manufacturerAuth, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     
@@ -159,7 +174,6 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ msg: 'Product not found' });
     }
 
-    // Check if the user is the seller of this product
     if (product.seller.toString() !== req.user.toString()) {
       return res.status(403).json({ msg: 'Access denied. You can only delete your own products.' });
     }
@@ -171,5 +185,6 @@ router.delete('/:id', auth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;

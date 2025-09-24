@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const Product = require('./models/product.model');
 const User = require('./models/user.model');
+const bcrypt = require('bcryptjs');
 
 const SELLER_USER_ID = '68cfdf5929882f6250e7cd15';
 
@@ -366,5 +367,21 @@ const importData = async () => {
     process.exit(1);
   }
 };
+// Add this to seeder.js
+const createAdminUser = async () => {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash('admin123', salt);
+
+  const adminUser = new User({
+    name: 'Admin',
+    email: 'admin@pressmart.com',
+    password: await bcrypt.hash('admin123', 10),
+    role: 'admin'
+  });
+
+  await adminUser.save();
+  console.log('Admin user created ');
+};
 
 importData();
+

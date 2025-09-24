@@ -71,6 +71,19 @@ const Navbar = () => {
               <Link to="/shop">Shop</Link>
               <Link to="#">Pages</Link>
               <Link to="#">Blog</Link>
+              {currentUser && (
+                <>
+                  {currentUser.role === 'admin' && (
+                    <Link to="/admin" className="icon-btn"title="Admin Dashboard">⚙️</Link>
+                  )}
+                  {(currentUser.role === 'manufacturer' || currentUser.role === 'admin') && (
+                    <Link to="/manufacturer" className="icon-btn"title="Manufacturer Dashboard" > 🏭 </Link>
+                  )}
+                  {!currentUser.role || currentUser.role === 'customer' ? (
+                    <Link to="/become-manufacturer" className="icon-btn" title="Become Manufacturer"> 🏭 </Link>
+                  ) : null}
+                </>
+              )}
             </nav>
 
              <form onSubmit={handleSearch} className="navbar-search">
