@@ -45,6 +45,31 @@ const ProfilePage = () => {
           </div>
         )}
       </div>
+      <div className="manufacturer-section">
+        <h2>Manufacturer Status</h2>
+        {currentUser?.role === 'manufacturer' ? (
+          <div>
+            <p>✅ You are a registered manufacturer.</p>
+            <Link to="/manufacturer">
+             <button className="dashboard-btn">Go to Manufacturer Dashboard</button>
+            </Link>
+          </div>
+        ) : currentUser?.role === 'admin' ? (
+          <div>
+            <p>👑 You are an administrator.</p>
+            <Link to="/admin">
+              <button className="dashboard-btn">Go to Admin Dashboard</button>
+            </Link>
+          </div>
+        ) : (
+          <div>
+            <p>Want to become a manufacturer and sell your products?</p>
+            <Link to="/become-manufacturer">
+              <button className="become-seller-btn">Become a Manufacturer</button>
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

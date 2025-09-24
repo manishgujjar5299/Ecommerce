@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorMessage from '../components/ErrorMessage';
 import Modal from '../components/Modal';
 import { CartContext } from '../context/CartContext';
 import './ShopPage.css';
@@ -17,6 +19,8 @@ const ShopPage = () => {
   const [brand, setBrand] = useState('All'); // <-- New state for brand filter
   const [sortBy, setSortBy] = useState('default');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const { addToCart } = useContext(CartContext);
   
   const query = useQuery();
@@ -33,12 +37,21 @@ const ShopPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoading(true);
+        setError('');
         const response = await fetch('http://localhost:5000/api/products');
+
+        if (!response.ok) {
+          throw new Error('Error ${response.status}: Failed to fetch products');
+        }
+
         const data = await response.json();
         setAllProducts(data);
       } catch (error) {
         console.error("Failed to fetch products:", error);
+        setError(error.message || 'Failed to load products. Please try again later.');
       }
+      finally { setLoading(false); }
     };
     fetchProducts();
   }, []);
@@ -72,6 +85,17 @@ const ShopPage = () => {
 
   const handleQuickView = (product) => { setSelectedProduct(product); };
   const handleCloseModal = () => { setSelectedProduct(null); };
+
+  const retryFetch = () => {
+    window.location.reload();
+  };
+
+  if(loading){
+    return <LoadingSpinner message='Loading products.....'/>;
+  }
+  if(error) {
+    return <ErrorMessage message={error} onRetry={retryFetch} />;
+  }
 
   const allCategories = ['All', ...new Set(allProducts.map(p => p.category))];
   const allBrands = ['All', ...new Set(allProducts.map(p => p.brand))]; // <-- Get all unique brands

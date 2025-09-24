@@ -21,6 +21,12 @@ import ProfilePage from './pages/ProfilePage';
 import SellerRoute from './components/SellerRoute';
 import AddProductPage from './pages/AddProductPage';
 import MyProductsPage from './pages/MyProductsPage';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminUserManagement from './pages/AdminUserManagement';
+import ManufacturerDashboard from './pages/ManufacturerDashboard';
+import BecomeManufacturerPage from './pages/BecomeManufacturerPage';
+import AdminRoute from './components/AdminRoute';
+import ManufacturerRoute from './components/ManufacturerRoute';
 import './App.css';
 
 function App() {
@@ -54,6 +60,51 @@ function App() {
           <Route path="/dashboard/my-products" element={
             <SellerRoute><MyProductsPage /></SellerRoute>
           } />
+          
+          {/* Manufacturer Routes */}
+          <Route path="/become-manufacturer" element={
+            <PrivateRoute>
+              <BecomeManufacturerPage />
+            </PrivateRoute>
+          } />
+          <Route path="/manufacturer" element={
+            <ManufacturerRoute>
+              <ManufacturerDashboard />
+            </ManufacturerRoute>
+          } />
+          <Route path="/manufacturer/add-product" element={
+            <ManufacturerRoute>
+              <AddProductPage />
+            </ManufacturerRoute>
+          } />
+          <Route path="/manufacturer/my-products" element={
+            <ManufacturerRoute>
+              <MyProductsPage />
+            </ManufacturerRoute>
+          } />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/users" element={
+            <AdminRoute>
+              <AdminUserManagement />
+            </AdminRoute>
+          } />
+          <Route path="/admin/products" element={
+            <AdminRoute>
+              <MyProductsPage />
+            </AdminRoute>
+          } />
+          <Route path="/admin/manufacturers" element={
+            <AdminRoute>
+              <AdminUserManagement />
+            </AdminRoute>
+          } />
+          <Route path="/test-admin" element={<AdminDashboard />} />
         </Routes>
       </main>
       <Footer />

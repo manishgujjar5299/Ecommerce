@@ -1,43 +1,91 @@
-.add-product-page h1 {
+.add-product-form input.error,
+.add-product-form textarea.error,
+.add-product-form select.error {
+  border-color: #dc3545;
+  background-color: #f8f9fa;
+}
+
+.error-text {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.submit-btn:disabled {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.no-products-message {
+  grid-column: 1 / -1;
   text-align: center;
-  margin-bottom: 2rem;
-}
-
-.add-product-form {
-  max-width: 600px;
-  margin: 0 auto;
-  background-color: #fff;
-  padding: 2rem;
+  padding: 60px 20px;
+  background-color: var(--light-color);
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.add-product-form .form-group {
+.no-products-message p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+
+.no-products-message button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* Form validation visual improvements */
+.form-group {
+  position: relative;
   margin-bottom: 1.5rem;
 }
 
-.add-product-form label {
-  display: block;
-  margin-bottom: 0.5rem;
+.form-group label {
   font-weight: 600;
+  color: var(--dark-text-color);
+  margin-bottom: 0.5rem;
+  display: block;
 }
 
-.add-product-form input,
-.add-product-form textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  font-family: var(--font-family);
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 115, 230, 0.1);
 }
 
-.add-product-form textarea {
-  min-height: 100px;
-  resize: vertical;
+/* Success states */
+.form-group input:valid:not(.error),
+.form-group textarea:valid:not(.error),
+.form-group select:valid:not(.error) {
+  border-color: #28a745;
 }
 
-.submit-btn {
-  width: 100%;
-  padding: 12px;
-  font-size: 1.1rem;
+/* Loading overlay for forms */
+.form-loading-overlay {
+  position: relative;
+}
+
+.form-loading-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
 }

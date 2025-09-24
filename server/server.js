@@ -20,6 +20,11 @@ connection.once('open', () => {
 // --- API Routes ---
 const productsRouter = require('./routes/products'); // Import the new route
 const usersRouter = require('./routes/users');
+const adminRouter = require('./routes/admin');
+const manufacturerRouter = require('./routes/manufacturer');
+
+app.use('/api/admin', adminRouter);
+app.use('/api/manufacturer', manufacturerRouter);
 
 app.use('/api/products', productsRouter); // Use the new route
 app.use('/api/users', usersRouter); 

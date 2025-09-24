@@ -20,6 +20,11 @@ const productSchema = new Schema({
   brand: { type: String, required: true },
   seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
   // These are the new fields for reviews
   reviews: [reviewSchema], // An array of review objects
   rating: { type: Number, required: true, default: 0 },

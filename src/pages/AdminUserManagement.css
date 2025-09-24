@@ -1,0 +1,148 @@
+.admin-user-management {
+  padding-top: 40px;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  margin-bottom: 0.5rem;
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 2rem;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+}
+
+.role-filter {
+  padding: 10px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: white;
+  min-width: 150px;
+}
+
+.users-table-container {
+  background: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th {
+  background: var(--light-color);
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.users-table td {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.user-info strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.user-info span {
+  font-size: 0.8rem;
+  color: var(--text-color);
+}
+
+.role-select {
+  padding: 5px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: white;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.suspended {
+  background: #d4edda;
+  color: #155724;
+}
+
+.action-btn-small {
+  padding: 5px 10px;
+  margin-right: 5px;
+  border: 1px solid var(--border-color);
+  background: white;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.action-btn-small:hover {
+  background: var(--light-color);
+}
+
+/* .action-btn-small.danger {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.action-btn-small.danger:hover {
+  background: #f1b0b7;
+}
+
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .users-table-container {
+    overflow-x: auto;
+  }
+  
+  .users-table {
+    min-width: 600px;
+  }
+} */

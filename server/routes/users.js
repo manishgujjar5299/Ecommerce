@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const bcrypt = require('bcryptjs');
+const bcrypt = require('../node_modules/bcryptjs/umd');
 const jwt = require('jsonwebtoken');
 let User = require('../models/user.model');
 const auth = require('../middleware/auth');
@@ -59,33 +59,48 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         isSeller: user.isSeller,
+        role: user.role || 'customer',
+        companyName: user.companyName,
+        verificationStatus: user.verificationStatus
       },
     });
 
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-router.post('/become-seller', auth, async (req, res) => {
+router.post('/become-manufacturer', auth, async (req, res) => {
   try {
+    const { companyName, companyDescription } = req.body;
+    
     const user = await User.findById(req.user);
     if (!user) {
       return res.status(404).json({ msg: 'User not found.' });
     }
 
+    user.role = 'manufacturer';
+    user.companyName = companyName;
+    user.companyDescription = companyDescription;
+    user.verificationStatus = 'pending';
     user.isSeller = true;
+    
     await user.save();
 
     res.json({
-      msg: 'Congratulations! You are now a seller.',
+      msg: 'Manufacturer application submitted! Please wait for admin approval.',
       user: {
         id: user._id,
         name: user.name,
-        isSeller: user.isSeller,
-      },
+        role: user.role,
+        companyName: user.companyName,
+        verificationStatus: user.verificationStatus,
+        isSeller: user.isSeller
+      }
     });
   } catch (err) {
+    console.error('Become manufacturer error:', err);
     res.status(500).json({ error: err.message });
   }
 });
