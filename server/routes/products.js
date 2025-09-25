@@ -34,7 +34,7 @@ router.get('/:id', async (req, res) => {
 
 // --- GET ALL PRODUCTS FOR ADMIN REVIEW (Protected Admin Route) ---
 // This route is for the admin dashboard to see all products, regardless of status.
-router.get('/all', adminAuth, async (req, res) => {
+router.get('/admin/all-products', adminAuth, async (req, res) => {
   try {
     const products = await Product.find().populate('seller', 'name companyName');
     res.json(products);
@@ -45,7 +45,7 @@ router.get('/all', adminAuth, async (req, res) => {
 
 // --- GET PRODUCTS BY SELLER/MANUFACTURER (Protected Route) ---
 // This route is for the manufacturer dashboard to see only their own products.
-router.get('/my-products', auth, async (req, res) => {
+router.get('/user/my-products', auth, async (req, res) => {
   try {
     const myProducts = await Product.find({ seller: req.user }).populate('seller', 'name');
     res.json(myProducts);
@@ -75,6 +75,14 @@ router.post('/add', auth, async (req, res) => {
       return res.status(403).json({ msg: 'Only sellers/manufacturers can add products' });
     }
 
+    // Fixed: Proper status logic based on user role
+    let productStatus = 'pending'; // Default for all users
+    
+    // Only admins can directly add approved products
+    if (user.role === 'admin') {
+      productStatus = 'approved';
+    }
+
     const newProduct = new Product({
       name,
       price: Number(price),
@@ -83,12 +91,17 @@ router.post('/add', auth, async (req, res) => {
       category,
       brand,
       seller: req.user,
-      status: 'pending' // Products are 'pending' by default and must be approved by admin.
+      status: productStatus // Products are 'pending' by default and must be approved by admin.
     });
 
     const savedProduct = await newProduct.save();
+    const message = user.role === 'admin' 
+      ? 'Product added and approved successfully!' 
+      : 'Product added successfully! Awaiting admin approval.';
+
+
     res.status(201).json({
-      msg: 'Product added successfully! Awaiting admin approval.',
+      msg: message,
       product: savedProduct
     });
 
@@ -145,18 +158,32 @@ router.put('/update/:id', manufacturerAuth, async (req, res) => {
       return res.status(404).json({ msg: 'Product not found' });
     }
 
-    if (product.seller.toString() !== req.user.toString()) {
+     const user = await User.findById(req.user);
+    if (user.role !== 'admin' && product.seller.toString() !== req.user.toString()) {
       return res.status(403).json({ msg: 'Access denied. You can only update your own products.' });
     }
 
+    // If manufacturer updates, set status back to pending (unless admin)
+    const updateData = { ...req.body };
+    if (user.role !== 'admin') {
+      updateData.status = 'pending';
+    }
+    // if (product.seller.toString() !== req.user.toString()) {
+    //   return res.status(403).json({ msg: 'Access denied. You can only update your own products.' });
+    // }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, status: 'pending' }, // Status reverts to pending on update, awaiting re-approval.
+      updateData, // Status reverts to pending on update, awaiting re-approval.
       { new: true }
     );
 
+    const message = user.role === 'admin' 
+      ? 'Product updated successfully!' 
+      : 'Product updated successfully! Awaiting re-approval.';
+
     res.json({
-      msg: 'Product updated successfully! Awaiting re-approval.',
+      msg: message,
       product: updatedProduct
     });
 
@@ -174,9 +201,14 @@ router.delete('/:id', manufacturerAuth, async (req, res) => {
       return res.status(404).json({ msg: 'Product not found' });
     }
 
-    if (product.seller.toString() !== req.user.toString()) {
+    const user = await User.findById(req.user);
+    if (user.role !== 'admin' && product.seller.toString() !== req.user.toString()) {
       return res.status(403).json({ msg: 'Access denied. You can only delete your own products.' });
     }
+
+    // if (product.seller.toString() !== req.user.toString()) {
+    //   return res.status(403).json({ msg: 'Access denied. You can only delete your own products.' });
+    // }
 
     await Product.findByIdAndDelete(req.params.id);
     res.json({ msg: 'Product deleted successfully!' });
