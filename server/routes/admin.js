@@ -89,20 +89,22 @@ router.get('/products', adminAuth, async (req, res) => {
 // Approve/reject manufacturer
 router.put('/products/:id/status', adminAuth, async (req, res) => {
   try {
-    const { Status } = req.body;
+    const { status } = req.body;
     const validStatuses = ['pending', 'approved', 'rejected'];
     
-    if (!validStatuses.includes(Status)) {
-      return res.status(400).json({ msg: 'Invalid status' });
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ msg: 'Invalid status. Must be: pending, approved, or rejected' });
     }
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      { Status },
+      { status },
       { new: true }
     );
-
-    res.json({ msg: 'Manufacturer status updated successfully', product });
+    if (!product) {
+      return res.status(404).json({ msg: 'Product not found' });
+    }
+    res.json({ msg: 'Product status updated to ${status} successfully', product });
   } catch (error) {
     console.error('Update product status error:', error);
     res.status(500).json({ error: error.message });

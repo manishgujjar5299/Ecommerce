@@ -27,6 +27,7 @@ import ManufacturerDashboard from './pages/ManufacturerDashboard';
 import BecomeManufacturerPage from './pages/BecomeManufacturerPage';
 import AdminRoute from './components/AdminRoute';
 import ManufacturerRoute from './components/ManufacturerRoute';
+import AdminProductManagement from './pages/AdminProductManagement';
 import './App.css';
 
 function App() {
@@ -102,6 +103,11 @@ function App() {
           <Route path="/admin/manufacturers" element={
             <AdminRoute>
               <AdminUserManagement />
+            </AdminRoute>
+          } />
+          <Route path="/admin/products" element={
+            <AdminRoute>
+              <AdminProductManagement />
             </AdminRoute>
           } />
           <Route path="/test-admin" element={<AdminDashboard />} />
