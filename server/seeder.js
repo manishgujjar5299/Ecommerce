@@ -4,7 +4,7 @@ const Product = require('./models/product.model');
 const User = require('./models/user.model');
 const bcrypt = require('bcryptjs');
 
-const SELLER_USER_ID = '68cfdf5929882f6250e7cd15';
+// const SELLER_USER_ID = '68cfdf5929882f6250e7cd15';
 
 const productsToSeed = [
   {
@@ -345,43 +345,72 @@ const importData = async () => {
     await mongoose.connect(uri);
     console.log("DB connected for seeding.");
 
-    const seller = await User.findById(SELLER_USER_ID);
-    if (!seller) {
-      console.error('Error: Seller user not found. Please check the SELLER_USER_ID.');
-      process.exit(1);
+    // First, create or find admin user
+    let adminUser = await User.findOne({ email: 'admin@pressmart.com' });
+    if (!adminUser) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('admin123', salt);
+
+      adminUser = new User({
+        name: 'Admin User',
+        email: 'admin@pressmart.com',
+        password: hashedPassword,
+        role: 'admin',
+        isSeller: true
+      });
+
+      await adminUser.save();
+      console.log('Admin user created successfully!');
+    } else {
+      console.log('Admin user already exists!');
+    }
+
+    // Create or find seller user
+    let sellerUser = await User.findOne({ email: 'seller@pressmart.com' });
+    if (!sellerUser) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('seller123', salt);
+
+      sellerUser = new User({
+        name: 'Demo Seller',
+        email: 'seller@pressmart.com',
+        password: hashedPassword,
+        role: 'manufacturer',
+        isSeller: true,
+        companyName: 'Demo Company',
+        companyDescription: 'A demo company for seeding products',
+        verificationStatus: 'approved'
+      });
+
+      await sellerUser.save();
+      console.log('Seller user created successfully!');
+    } else {
+      console.log('Seller user already exists!');
     }
     
-    // Add the seller's ID to every product
-    const productsWithSeller = productsToSeed.map(product => ({
-      ...product,
-      seller: seller._id,
-    }));
-    await Product.deleteMany(); // Clear existing products
+    // Clear existing products
+    await Product.deleteMany();
     console.log("Old products cleared.");
     
-    await Product.insertMany(productsWithSeller); // Insert new products
-    console.log('Data Imported Successfully! ✅');
+    // Add seller ID to products and insert
+    const productsWithSeller = productsToSeed.map(product => ({
+      ...product,
+      seller: sellerUser._id,
+      status: 'approved' // Approved for demo
+    }));
+    
+    await Product.insertMany(productsWithSeller);
+    console.log('Products imported successfully!');
+    
+    console.log('\n=== Demo Accounts Created ===');
+    console.log('Admin - Email: admin@pressmart.com, Password: admin123');
+    console.log('Seller - Email: seller@pressmart.com, Password: seller123');
+    
     process.exit();
   } catch (error) {
     console.error(`Error: ${error.message}`);
     process.exit(1);
   }
 };
-// Add this to seeder.js
-const createAdminUser = async () => {
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash('admin123', salt);
-
-  const adminUser = new User({
-    name: 'Admin',
-    email: 'admin@pressmart.com',
-    password: await bcrypt.hash('admin123', 10),
-    role: 'admin'
-  });
-
-  await adminUser.save();
-  console.log('Admin user created ');
-};
 
 importData();
-

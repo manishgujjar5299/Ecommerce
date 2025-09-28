@@ -1,3 +1,4 @@
+/* Updated AdminUserManagement.css - With manufacturer approval styles */
 .admin-user-management {
   padding-top: 40px;
 }
@@ -10,22 +11,126 @@
   margin-bottom: 0.5rem;
 }
 
+/* Pending Manufacturers Section */
+.pending-manufacturers {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 2rem;
+}
+
+.pending-manufacturers h2 {
+  color: #856404;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pending-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.pending-card {
+  background: white;
+  border: 1px solid #ffeaa7;
+  border-radius: var(--border-radius);
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.pending-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pending-card-header h3 {
+  margin: 0;
+  color: var(--dark-text-color);
+}
+
+.pending-badge {
+  background: #ffc107;
+  color: #856404;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pending-card-body {
+  margin-bottom: 15px;
+}
+
+.pending-card-body p {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.pending-card-body strong {
+  color: var(--dark-text-color);
+}
+
+.pending-card-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.approve-btn, .reject-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.approve-btn {
+  background: #28a745;
+  color: white;
+}
+
+.approve-btn:hover {
+  background: #218838;
+}
+
+.reject-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.reject-btn:hover {
+  background: #c82333;
+}
+
+/* Filters */
 .filters {
   display: flex;
   gap: 15px;
   margin-bottom: 2rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-input {
   flex: 1;
+  min-width: 250px;
   padding: 10px 15px;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   font-size: 1rem;
 }
 
-.role-filter {
+.role-filter, .verification-filter {
   padding: 10px 15px;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -33,6 +138,7 @@
   min-width: 150px;
 }
 
+/* Users Table */
 .users-table-container {
   background: #fff;
   border-radius: var(--border-radius);
@@ -76,6 +182,7 @@
   background: white;
 }
 
+/* Status Badges */
 .status-badge {
   padding: 4px 8px;
   border-radius: 12px;
@@ -84,7 +191,7 @@
   text-transform: capitalize;
 }
 
-.status-badge.active {
+.status-badge.approved {
   background: #d4edda;
   color: #155724;
 }
@@ -94,9 +201,38 @@
   color: #856404;
 }
 
-.status-badge.suspended {
-  background: #d4edda;
-  color: #155724;
+.status-badge.rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Inline Actions */
+.inline-actions {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.mini-approve-btn, .mini-reject-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-approve-btn {
+  background: #28a745;
+  color: white;
+}
+
+.mini-reject-btn {
+  background: #dc3545;
+  color: white;
 }
 
 .action-btn-small {
@@ -113,23 +249,9 @@
   background: var(--light-color);
 }
 
-/* .action-btn-small.danger {
-  background: #f8d7da;
-  border-color: #f5c6cb;
-  color: #721c24;
-}
-
-.action-btn-small.danger:hover {
-  background: #f1b0b7;
-}
-
-
+/* Responsive Design */
 @media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .action-buttons {
+  .pending-cards {
     grid-template-columns: 1fr;
   }
   
@@ -138,11 +260,23 @@
     align-items: stretch;
   }
   
+  .search-input {
+    min-width: auto;
+  }
+  
   .users-table-container {
     overflow-x: auto;
   }
   
   .users-table {
-    min-width: 600px;
+    min-width: 700px;
   }
-} */
+  
+  .pending-card-actions {
+    justify-content: stretch;
+  }
+  
+  .approve-btn, .reject-btn {
+    flex: 1;
+  }
+}

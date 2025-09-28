@@ -36,8 +36,8 @@ const MyProductsPage = () => {
   }, [token, isAdminPage]);
 
   const handleEdit = (productId) => {
-    // Future mein EditProductPage banayenge
-    navigate(`/dashboard/edit-product/${productId}`);
+    const basePath = isAdminPage ? '/admin' : '/manufacturer';
+    navigate(`${basePath}/edit-product/${productId}`);
   };
 
   const handleDelete = async (productId) => {

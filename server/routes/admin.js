@@ -52,8 +52,62 @@ router.get('/users', adminAuth, async (req, res) => {
   }
 });
 
+// Get pending manufacturers (NEW ROUTE)
+router.get('/pending-manufacturers', adminAuth, async (req, res) => {
+  try {
+    const pendingManufacturers = await User.findPendingManufacturers();
+    res.json(pendingManufacturers);
+  } catch (error) {
+    console.error('Get pending manufacturers error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Approve/Reject Manufacturer (FIXED ROUTE)
+router.put('/users/:id/verify', adminAuth, async (req, res) => {
+  try {
+    const { verificationStatus } = req.body; // Changed from 'status' to 'verificationStatus'
+    const validStatuses = ['pending', 'approved', 'rejected'];
+    
+    if (!validStatuses.includes(verificationStatus)) {
+      return res.status(400).json({ msg: 'Invalid verification status' });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Only manufacturers need verification
+    if (user.role !== 'manufacturer') {
+      return res.status(400).json({ msg: 'Only manufacturers require verification' });
+    }
+
+    // Update verification status
+    user.verificationStatus = verificationStatus;
+    
+    // If approved, allow selling
+    if (verificationStatus === 'approved') {
+      user.isSeller = true;
+    } else if (verificationStatus === 'rejected') {
+      // If rejected, remove seller privileges
+      user.isSeller = false;
+    }
+
+    await user.save();
+
+    res.json({ 
+      msg: `Manufacturer ${verificationStatus} successfully`, 
+      user: user.toJSON()
+    });
+  } catch (error) {
+    console.error('Update verification status error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update user role
-router.put('/users/:id/status', adminAuth, async (req, res) => {
+router.put('/users/:id/role', adminAuth, async (req, res) => {
   try {
     const { role } = req.body;
     const validRoles = ['customer', 'seller', 'manufacturer', 'admin'];
@@ -64,7 +118,7 @@ router.put('/users/:id/status', adminAuth, async (req, res) => {
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { role, isSeller: role === 'seller' || role === 'manufacturer' || role === 'admin' },
+      { role},
       { new: true }
     ).select('-password');
 
@@ -104,7 +158,7 @@ router.put('/products/:id/status', adminAuth, async (req, res) => {
     if (!product) {
       return res.status(404).json({ msg: 'Product not found' });
     }
-    res.json({ msg: 'Product status updated to ${status} successfully', product });
+    res.json({ msg: 'Product ${status} successfully', product });
   } catch (error) {
     console.error('Update product status error:', error);
     res.status(500).json({ error: error.message });

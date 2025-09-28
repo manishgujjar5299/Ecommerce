@@ -7,6 +7,7 @@ const AdminUserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
+  const [filterVerification, setFilterVerification] = useState('all');
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -31,6 +32,69 @@ const AdminUserManagement = () => {
     }
   }, [token]);
 
+  // Approve manufacturer function
+  const approveManufacturer = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/verify`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify({ verificationStatus: 'approved' })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // Update user in state
+        setUsers(users.map(user => 
+          user._id === userId ? { ...user, verificationStatus: 'approved', isSeller: true } : user
+        ));
+        alert(result.msg || 'Manufacturer approved successfully');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to approve: ${errorData.msg}`);
+      }
+    } catch (error) {
+      console.error('Approval error:', error);
+      alert('Failed to approve manufacturer');
+    }
+  };
+
+  // Reject manufacturer function
+  const rejectManufacturer = async (userId) => {
+    if (!window.confirm('Are you sure you want to reject this manufacturer application?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/verify`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify({ verificationStatus: 'rejected' })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // Update user in state
+        setUsers(users.map(user => 
+          user._id === userId ? { ...user, verificationStatus: 'rejected', isSeller: false } : user
+        ));
+        alert(result.msg || 'Manufacturer rejected successfully');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to reject: ${errorData.msg}`);
+      }
+    } catch (error) {
+      console.error('Rejection error:', error);
+      alert('Failed to reject manufacturer');
+    }
+  };
+
+
   const handleRoleChange = async (userId, newRole) => {
     try {
       const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/role`, {
@@ -52,13 +116,17 @@ const AdminUserManagement = () => {
       alert('Failed to update user role');
     }
   };
+  
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
-    return matchesSearch && matchesRole;
+    const matchesVerification = filterVerification === 'all' || user.verificationStatus === filterVerification;
+    return matchesSearch && matchesRole && matchesVerification;
   });
+
+  const pendingManufacturers = users.filter(user => user.role === 'manufacturer' && user.verificationStatus === 'pending');
 
   if (loading) return <div className="container"><p>Loading users...</p></div>;
 
@@ -68,6 +136,44 @@ const AdminUserManagement = () => {
         <h1>User Management</h1>
         <p>Manage all users on your platform</p>
       </div>
+
+      
+      {/* Pending Manufacturers Section */}
+      {pendingManufacturers.length > 0 && (
+        <div className="pending-manufacturers">
+          <h2>Pending Manufacturer Approvals ({pendingManufacturers.length})</h2>
+          <div className="pending-cards">
+            {pendingManufacturers.map(user => (
+              <div key={user._id} className="pending-card">
+                <div className="pending-card-header">
+                  <h3>{user.name}</h3>
+                  <span className="pending-badge">Pending</span>
+                </div>
+                <div className="pending-card-body">
+                  <p><strong>Email:</strong> {user.email}</p>
+                  <p><strong>Company:</strong> {user.companyName}</p>
+                  <p><strong>Applied:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
+                  <p><strong>Description:</strong> {user.companyDescription}</p>
+                </div>
+                <div className="pending-card-actions">
+                  <button 
+                    onClick={() => approveManufacturer(user._id)}
+                    className="approve-btn"
+                  >
+                    Approve
+                  </button>
+                  <button 
+                    onClick={() => rejectManufacturer(user._id)}
+                    className="reject-btn"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="filters">
         <input
@@ -88,6 +194,16 @@ const AdminUserManagement = () => {
           <option value="manufacturer">Manufacturers</option>
           <option value="admin">Admins</option>
         </select>
+        <select
+          value={filterVerification}
+          onChange={(e) => setFilterVerification(e.target.value)}
+          className="verification-filter"
+        >
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
       </div>
 
       <div className="users-table-container">
@@ -98,7 +214,7 @@ const AdminUserManagement = () => {
               <th>Email</th>
               <th>Role</th>
               <th>Joined</th>
-              <th>Status</th>
+              <th>VerificationStatus</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -126,9 +242,25 @@ const AdminUserManagement = () => {
                 </td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td>
-                  <span className={`status-badge ${user.verificationStatus || 'active'}`}>
-                    {user.verificationStatus || 'Active'}
+                  <span className={`status-badge ${user.verificationStatus || 'approved'}`}>
+                    {user.verificationStatus || 'Approved'}
                   </span>
+                  {user.role === 'manufacturer' && user.verificationStatus === 'pending' && (
+                    <div className="inline-actions">
+                      <button 
+                        onClick={() => approveManufacturer(user._id)}
+                        className="mini-approve-btn"
+                      >
+                        ✓
+                      </button>
+                      <button 
+                        onClick={() => rejectManufacturer(user._id)}
+                        className="mini-reject-btn"
+                      >
+                        ✗
+                      </button>
+                    </div>
+                  )}
                 </td>
                 <td>
                   <button className="action-btn-small">View</button>

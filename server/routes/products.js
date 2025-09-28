@@ -1,4 +1,3 @@
-// routes/products.js
 const router = require('express').Router();
 const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
@@ -65,22 +64,36 @@ router.post('/add', auth, async (req, res) => {
       return res.status(400).json({ msg: 'All fields are required.' });
     }
 
-    // The manufacturerAuth middleware already checks for role, but a direct check adds clarity.
     const user = await User.findById(req.user);
     if (!user) {
-      return res.status(403).json({ msg: 'User not foumd' });
+      return res.status(404).json({ msg: 'User not found' });
     }
     
-    if (!user.isSeller && user.role !== 'manufacturer' && user.role !== 'admin') {
-      return res.status(403).json({ msg: 'Only sellers/manufacturers can add products' });
+    // FIXED: Allow manufacturers to add products
+    const canAddProducts = user.role === 'admin' || 
+                          user.role === 'seller' || 
+                          (user.role === 'manufacturer' && user.verificationStatus === 'approved');
+    
+    if (!canAddProducts) {
+      if (user.role === 'manufacturer' && user.verificationStatus === 'pending') {
+        return res.status(403).json({ 
+          msg: 'Your manufacturer account is pending admin approval. Please wait for verification.' 
+        });
+      } else if (user.role === 'manufacturer' && user.verificationStatus === 'rejected') {
+        return res.status(403).json({ 
+          msg: 'Your manufacturer account has been rejected. Please contact admin.' 
+        });
+      } else {
+        return res.status(403).json({ 
+          msg: 'Only approved sellers/manufacturers can add products' 
+        });
+      }
     }
 
-    // Fixed: Proper status logic based on user role
-    let productStatus = 'pending'; // Default for all users
-    
-    // Only admins can directly add approved products
+    // Set product status based on user role
+    let productStatus = 'pending'; // Default
     if (user.role === 'admin') {
-      productStatus = 'approved';
+      productStatus = 'approved'; // Admins can directly approve
     }
 
     const newProduct = new Product({
@@ -159,9 +172,14 @@ router.put('/update/:id', manufacturerAuth, async (req, res) => {
     }
 
      const user = await User.findById(req.user);
-    if (user.role !== 'admin' && product.seller.toString() !== req.user.toString()) {
+    
+    // Check ownership or admin privileges
+    const canEdit = user.role === 'admin' || product.seller.toString() === req.user.toString();
+    
+    if (!canEdit) {
       return res.status(403).json({ msg: 'Access denied. You can only update your own products.' });
     }
+
 
     // If manufacturer updates, set status back to pending (unless admin)
     const updateData = { ...req.body };
@@ -202,7 +220,9 @@ router.delete('/:id', manufacturerAuth, async (req, res) => {
     }
 
     const user = await User.findById(req.user);
-    if (user.role !== 'admin' && product.seller.toString() !== req.user.toString()) {
+    const canDelete = user.role === 'admin' || product.seller.toString() === req.user.toString();
+    
+    if (!canDelete) {
       return res.status(403).json({ msg: 'Access denied. You can only delete your own products.' });
     }
 
