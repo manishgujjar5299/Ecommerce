@@ -13,7 +13,7 @@ const AdminUserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('${API_URL}/admin/users', {
+        const response = await fetch(`${API_URL}/admin/users`, {
           headers: { 'x-auth-token': token }
         });
         if (response.ok) {

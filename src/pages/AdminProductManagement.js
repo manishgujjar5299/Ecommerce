@@ -11,7 +11,7 @@ const AdminProductManagement = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('${API_URL}/admin/products', {
+        const response = await fetch(`${API_URL}/admin/products`, {
           headers: { 'x-auth-token': token }
         });
         if (response.ok) {

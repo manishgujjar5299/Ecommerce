@@ -16,7 +16,7 @@ const MyProductsPage = () => {
   useEffect(() => {
     const fetchMyProducts = async () => {
       try {
-        const endpoint = isAdminPage ? '${API_URL}/admin/products' : '${API_URL}/products/my-products';
+        const endpoint = isAdminPage ? `${API_URL}/admin/products` : `${API_URL}/products/my-products`;
         const response = await fetch(endpoint, {
           headers: {
             'x-auth-token': token,

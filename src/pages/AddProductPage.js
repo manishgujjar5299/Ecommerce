@@ -57,7 +57,7 @@ const AddProductPage = () => {
     };
 
     try {
-      const response = await fetch('${API_URL}/products/add', {
+      const response = await fetch(`${API_URL}/products/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

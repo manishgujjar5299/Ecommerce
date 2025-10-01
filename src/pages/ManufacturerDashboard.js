@@ -18,10 +18,10 @@ const ManufacturerDashboard = () => {
     const fetchManufacturerData = async () => {
       try {
         const [statsRes, productsRes] = await Promise.all([
-          fetch('${API_URL}/manufacturer/stats', {
+          fetch(`${API_URL}/manufacturer/stats`, {
             headers: { 'x-auth-token': token }
           }),
-          fetch('${API_URL}/manufacturer/recent-products', {
+          fetch(`${API_URL}/manufacturer/recent-products`, {
             headers: { 'x-auth-token': token }
           })
         ]);

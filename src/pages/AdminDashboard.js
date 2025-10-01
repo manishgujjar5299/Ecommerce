@@ -20,10 +20,10 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const [statsRes, activityRes] = await Promise.all([
-          fetch('${API_URL}/admin/stats', {
+          fetch(`${API_URL}/admin/stats`, {
             headers: { 'x-auth-token': token }
           }),
-          fetch('${API_URL}/admin/recent-activity', {
+          fetch(`${API_URL}/admin/recent-activity`, {
             headers: { 'x-auth-token': token }
           })
         ]);

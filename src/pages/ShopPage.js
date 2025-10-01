@@ -22,7 +22,7 @@ const ShopPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState(''); // Added local search state
+  // const [searchTerm, setSearchTerm] = useState(''); // Added local search state
   
   const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ const ShopPage = () => {
   useEffect(() => {
     setBrand(brandFromURL);
     setCategory(categoryFromURL);
-    setSearchTerm(urlSearchTerm); // Set search term from URL
+    // setSearchTerm(urlSearchTerm); // Set search term from URL
   }, [brandFromURL, categoryFromURL, urlSearchTerm]);
 
   // Fetch products
@@ -46,7 +46,7 @@ const ShopPage = () => {
       try {
         setLoading(true);
         setError('');
-        const response = await fetch('${API_URL}/products');
+        const response = await fetch(`${API_URL}/products`);
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: Failed to fetch products`);
@@ -120,7 +120,7 @@ const ShopPage = () => {
 
   // Fixed: Clear search with proper URL update
   const clearSearch = () => {
-    setSearchTerm('');
+    // setSearchTerm('');
     updateURLParams({ search: null });
   };
 
