@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import './ManufacturerDashboard.css';
-
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const ManufacturerDashboard = () => {
   const [manufacturerStats, setManufacturerStats] = useState({
     totalProducts: 0,
@@ -18,10 +18,10 @@ const ManufacturerDashboard = () => {
     const fetchManufacturerData = async () => {
       try {
         const [statsRes, productsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/manufacturer/stats', {
+          fetch('${API_URL}/manufacturer/stats', {
             headers: { 'x-auth-token': token }
           }),
-          fetch('http://localhost:5000/api/manufacturer/recent-products', {
+          fetch('${API_URL}/manufacturer/recent-products', {
             headers: { 'x-auth-token': token }
           })
         ]);

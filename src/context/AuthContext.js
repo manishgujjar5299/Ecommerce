@@ -3,15 +3,20 @@ import { useNavigate } from 'react-router-dom';
 
 export const AuthContext = createContext();
 
+// FIXED: Define the base API URL using an environment variable
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'; 
+
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken')); 
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const initializeAuth = () => {
       const storedToken = localStorage.getItem('token');
+      const storedRefreshToken = localStorage.getItem('refreshToken'); 
       const storedUser = localStorage.getItem('user');
       
       if (storedToken && storedUser) {
@@ -19,10 +24,11 @@ export const AuthProvider = ({ children }) => {
           const user = JSON.parse(storedUser);
           setCurrentUser(user);
           setToken(storedToken);
+          setRefreshToken(storedRefreshToken); 
         } catch (error) {
-          console.error('Error parsing stored user data:', error);
-          // Clear corrupted data
+          console.error('Error parsing stored user data or tokens:', error);
           localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken'); 
           localStorage.removeItem('user');
         }
       }
@@ -39,7 +45,8 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/users/register', {
+      // FIXED: Use the dynamic API_URL
+      const response = await fetch(`${API_URL}/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
@@ -59,9 +66,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken'); 
+    localStorage.removeItem('user');
+    setToken(null);
+    setRefreshToken(null); 
+    setCurrentUser(null);
+    navigate('/login');
+  };
+
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/users/login', {
+      // FIXED: Use the dynamic API_URL
+      const response = await fetch(`${API_URL}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -69,10 +87,12 @@ export const AuthProvider = ({ children }) => {
       
       const data = await response.json();
       
-      if (response.ok && data.token) {
+      if (response.ok && data.token && data.refreshToken) { 
         localStorage.setItem('token', data.token);
+        localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('user', JSON.stringify(data.user));
         setToken(data.token);
+        setRefreshToken(data.refreshToken); 
         setCurrentUser(data.user);
         navigate('/');
       } else {
@@ -84,18 +104,45 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setToken(null);
-    setCurrentUser(null);
-    navigate('/login');
+  const refreshAccessToken = async () => {
+    const currentRefreshToken = localStorage.getItem('refreshToken');
+    
+    if (!currentRefreshToken) {
+      console.warn("No refresh token available, forcing logout.");
+      logout();
+      return null;
+    }
+    
+    try {
+      // FIXED: Use the dynamic API_URL
+      const response = await fetch(`${API_URL}/users/token/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: currentRefreshToken }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('refreshToken', data.refreshToken); 
+        setToken(data.token);
+        setRefreshToken(data.refreshToken);
+        return data.token; 
+      } else {
+        logout();
+        throw new Error('Session expired, please log in again.');
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      logout();
+      return null;
+    }
   };
-
-  // Fixed: Proper manufacturer application without page reload
+  
   const becomeManufacturer = async (companyName, companyDescription) => {
     try {
-      const response = await fetch('http://localhost:5000/api/users/become-manufacturer', {
+      // FIXED: Use the dynamic API_URL
+      const response = await fetch(`${API_URL}/users/become-manufacturer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,8 +154,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       
       if (response.ok) {
-        // Update user state without page reload
-        updateUserData(data.user);
+        updateUserData(data.user); 
         return { success: true, message: data.msg, user: data.user };
       } else {
         return { success: false, message: data.msg || 'Application failed' };
@@ -119,10 +165,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Fixed: Legacy becomeSeller method - now properly updates state
   const becomeSeller = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/users/become-seller', {
+      // FIXED: Use the dynamic API_URL
+      const response = await fetch(`${API_URL}/users/become-seller`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +179,6 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       
       if (response.ok) {
-        // Update user state without page reload
         updateUserData(data.user);
         return true;
       } else {
@@ -146,12 +191,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Method to refresh user data from server
   const refreshUserData = async () => {
     if (!token) return;
     
     try {
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      // FIXED: Use the dynamic API_URL
+      const response = await fetch(`${API_URL}/users/profile`, {
         headers: { 'x-auth-token': token }
       });
       
@@ -174,7 +219,9 @@ export const AuthProvider = ({ children }) => {
     becomeSeller,
     becomeManufacturer,
     updateUserData,
-    refreshUserData
+    refreshUserData,
+    refreshToken, 
+    refreshAccessToken 
   };
 
   return (

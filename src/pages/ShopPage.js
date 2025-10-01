@@ -7,6 +7,8 @@ import Modal from '../components/Modal';
 import { CartContext } from '../context/CartContext';
 import './ShopPage.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'; 
+
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
 };
@@ -44,7 +46,7 @@ const ShopPage = () => {
       try {
         setLoading(true);
         setError('');
-        const response = await fetch('http://localhost:5000/api/products');
+        const response = await fetch('${API_URL}/products');
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: Failed to fetch products`);

@@ -4,6 +4,8 @@ import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import './ProductDetailPage.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ const ProductDetailPage = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        const response = await fetch(`${API_URL}/products/${id}`);
         if (!response.ok) {
           throw new Error('Product not found');
         }
@@ -44,7 +46,7 @@ const ProductDetailPage = () => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}/reviews`, {
+      const response = await fetch(`${API_URL}/products/${id}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +60,7 @@ const ProductDetailPage = () => {
         setRating(0);
         setComment('');
         // Refetch product to show the new review
-        const updatedResponse = await fetch(`http://localhost:5000/api/products/${id}`);
+        const updatedResponse = await fetch(`${API_URL}/products/${id}`);
         const updatedData = await updatedResponse.json();
         setProduct(updatedData);
       } else {

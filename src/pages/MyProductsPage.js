@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation} from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import './MyProductsPage.css';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const MyProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -15,7 +16,7 @@ const MyProductsPage = () => {
   useEffect(() => {
     const fetchMyProducts = async () => {
       try {
-        const endpoint = isAdminPage ? 'http://localhost:5000/api/admin/products' : 'http://localhost:5000/api/products/my-products';
+        const endpoint = isAdminPage ? '${API_URL}/admin/products' : '${API_URL}/products/my-products';
         const response = await fetch(endpoint, {
           headers: {
             'x-auth-token': token,
@@ -43,7 +44,7 @@ const MyProductsPage = () => {
   const handleDelete = async (productId) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+        const response = await fetch(`${API_URL}/products/${productId}`, {
           method: 'DELETE',
           headers: { 
             'x-auth-token': token 

@@ -1,10 +1,9 @@
-// Complete EditProductPage.js - Full Implementation
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import './AddProductPage.css'; // Reuse same styling
-
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const EditProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -43,7 +42,7 @@ const EditProductPage = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+        const response = await fetch(`${API_URL}/products/${id}`, {
           headers: { 'x-auth-token': token }
         });
 
@@ -154,7 +153,7 @@ const EditProductPage = () => {
         price: Number(formData.price)
       };
 
-      const response = await fetch(`http://localhost:5000/api/products/update/${id}`, {
+      const response = await fetch(`${API_URL}/products/update/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

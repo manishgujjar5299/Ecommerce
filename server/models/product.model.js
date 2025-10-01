@@ -40,7 +40,6 @@ const reviewSchema = new Schema({
 });
 
 // Index for reviews
-reviewSchema.index({ user: 1 });
 reviewSchema.index({ createdAt: -1 });
 reviewSchema.index({ rating: -1 });
 

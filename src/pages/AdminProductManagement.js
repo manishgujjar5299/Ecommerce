@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 // import './AdminProductManagement.css';
-
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const AdminProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +11,7 @@ const AdminProductManagement = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/admin/products', {
+        const response = await fetch('${API_URL}/admin/products', {
           headers: { 'x-auth-token': token }
         });
         if (response.ok) {
@@ -32,7 +32,7 @@ const AdminProductManagement = () => {
 
   const handleStatusChange = async (productId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}/status`, {
+      const response = await fetch(`${API_URL}/admin/products/${productId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

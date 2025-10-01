@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import './AdminDashboard.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -18,10 +20,10 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const [statsRes, activityRes] = await Promise.all([
-          fetch('http://localhost:5000/api/admin/stats', {
+          fetch('${API_URL}/admin/stats', {
             headers: { 'x-auth-token': token }
           }),
-          fetch('http://localhost:5000/api/admin/recent-activity', {
+          fetch('${API_URL}/admin/recent-activity', {
             headers: { 'x-auth-token': token }
           })
         ]);

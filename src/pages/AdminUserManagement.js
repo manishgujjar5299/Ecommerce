@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import './AdminUserManagement.css';
-
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const AdminUserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ const AdminUserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/admin/users', {
+        const response = await fetch('${API_URL}/admin/users', {
           headers: { 'x-auth-token': token }
         });
         if (response.ok) {
@@ -35,7 +35,7 @@ const AdminUserManagement = () => {
   // Approve manufacturer function
   const approveManufacturer = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/verify`, {
+      const response = await fetch(`${API_URL}/admin/users/${userId}/verify`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ const AdminUserManagement = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/verify`, {
+      const response = await fetch(`${API_URL}/admin/users/${userId}/verify`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ const AdminUserManagement = () => {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/role`, {
+      const response = await fetch(`${API_URL}/admin/users/${userId}/role`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import './AddProductPage.css';
-
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const AddProductPage = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -57,7 +57,7 @@ const AddProductPage = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/products/add', {
+      const response = await fetch('${API_URL}/products/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
