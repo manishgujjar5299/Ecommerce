@@ -30,7 +30,7 @@ class DatabaseConfig {
 
     // If full URI is provided, use it
     if (MONGO_URI) {
-      return MONGO_URI;
+      return MONGO_URI.trim();
     }
 
     // Build URI from components
