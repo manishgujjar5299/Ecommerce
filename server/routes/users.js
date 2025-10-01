@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const JWTConfig = require('../config/jwt'); // FIXED: Custom JWT class import
 let User = require('../models/user.model');
 const auth = require('../middleware/auth');
 
@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// --- LOGIN ROUTE ---
+// --- LOGIN ROUTE (UPDATED for Dual Tokens) ---
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -55,16 +55,17 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials.' });
     }
 
+    // FIXED: Generate Access Token and Refresh Token
+    const { accessToken, refreshToken } = JWTConfig.generateTokens({ id: user._id });
+
     // Update login statistics
     user.lastLoginAt = new Date();
     user.loginCount += 1;
     await user.save();
 
-    // Create and sign a token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    
     res.json({
-      token,
+      token: accessToken, // Access Token
+      refreshToken: refreshToken, // Refresh Token
       user: {
         id: user._id,
         name: user.name,
@@ -79,6 +80,40 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// --- TOKEN REFRESH ROUTE (NEW) ---
+router.post('/token/refresh', async (req, res) => {
+  const { refreshToken } = req.body;
+  
+  if (!refreshToken) {
+    return res.status(401).json({ msg: 'Refresh Token is required' });
+  }
+
+  try {
+    // 1. Verify the Refresh Token using the refresh secret
+    const decoded = JWTConfig.verifyRefreshToken(refreshToken);
+    const userId = decoded.id;
+
+    // 2. Check if user still exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(401).json({ msg: 'Invalid refresh token payload' });
+    }
+
+    // 3. Generate a new set of tokens (Access and new Refresh Token)
+    const newTokens = JWTConfig.generateTokens({ id: userId });
+
+    res.json({
+      token: newTokens.accessToken,
+      refreshToken: newTokens.refreshToken // Send the newly rotated refresh token
+    });
+
+  } catch (err) {
+    console.error('Token refresh error:', err.message);
+    // 403 status is used for expired/invalid tokens when re-authentication is needed
+    res.status(403).json({ msg: 'Invalid or expired refresh token. Please log in again.' });
   }
 });
 
@@ -113,7 +148,7 @@ router.post('/become-manufacturer', auth, async (req, res) => {
       });
     }
 
-    // Update user role and company info
+    // Update user role and company info (pre-save middleware handles verificationStatus)
     user.role = 'manufacturer';
     user.companyName = companyName;
     user.companyDescription = companyDescription;

@@ -1,5 +1,3 @@
-// Create new file: middleware/security.js
-// Input sanitization and security middleware
 const validator = require('validator');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
@@ -14,12 +12,18 @@ const sanitizeHtml = (input) => {
 
 // Deep sanitize object
 const sanitizeObject = (obj) => {
-  if (!obj || typeof obj !== 'object') return obj;
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
   
   const sanitized = {};
   
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
+
+      if (key.startsWith('$') || key.startsWith('.')) {
+          console.warn(`Security Warning: Filtered out invalid key: ${key}`);
+          continue; 
+      }
+      
       if (typeof obj[key] === 'string') {
         sanitized[key] = sanitizeHtml(obj[key]);
       } else if (typeof obj[key] === 'object' && obj[key] !== null) {

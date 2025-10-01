@@ -53,21 +53,23 @@ router.get('/users', adminAuth, async (req, res) => {
 });
 
 // Get pending manufacturers (NEW ROUTE)
-router.get('/pending-manufacturers', adminAuth, async (req, res) => {
-  try {
-    const pendingManufacturers = await User.findPendingManufacturers();
-    res.json(pendingManufacturers);
-  } catch (error) {
-    console.error('Get pending manufacturers error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+// router.get('/pending-manufacturers', adminAuth, async (req, res) => {
+//   try {
+//     const pendingManufacturers = await User.findPendingManufacturers();
+//     res.json(pendingManufacturers);
+//   } catch (error) {
+//     console.error('Get pending manufacturers error:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 // Approve/Reject Manufacturer (FIXED ROUTE)
 router.put('/users/:id/verify', adminAuth, async (req, res) => {
   try {
     const { verificationStatus } = req.body; // Changed from 'status' to 'verificationStatus'
     const validStatuses = ['pending', 'approved', 'rejected'];
+
+    console.log(`Verification request for user: ${req.params.id}, status: ${verificationStatus}`);
     
     if (!validStatuses.includes(verificationStatus)) {
       return res.status(400).json({ msg: 'Invalid verification status' });
@@ -77,12 +79,6 @@ router.put('/users/:id/verify', adminAuth, async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
-
-    // Only manufacturers need verification
-    if (user.role !== 'manufacturer') {
-      return res.status(400).json({ msg: 'Only manufacturers require verification' });
-    }
-
     // Update verification status
     user.verificationStatus = verificationStatus;
     
@@ -98,7 +94,14 @@ router.put('/users/:id/verify', adminAuth, async (req, res) => {
 
     res.json({ 
       msg: `Manufacturer ${verificationStatus} successfully`, 
-      user: user.toJSON()
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        verificationStatus: user.verificationStatus,
+        isSeller: user.isSeller
+      }
     });
   } catch (error) {
     console.error('Update verification status error:', error);
@@ -118,7 +121,7 @@ router.put('/users/:id/role', adminAuth, async (req, res) => {
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { role},
+      { role, isSeller: role === 'seller' || role === 'manufacturer' || role === 'admin' },
       { new: true }
     ).select('-password');
 

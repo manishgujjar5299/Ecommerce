@@ -1,5 +1,4 @@
-// middleware/auth.js
-const jwt = require('jsonwebtoken');
+const JWTConfig = require('../config/jwt'); // FIXED: Import the custom JWT config
 
 module.exports = function(req, res, next) {
   // Get token from header
@@ -12,10 +11,14 @@ module.exports = function(req, res, next) {
 
   // Verify token
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // FIXED: Use the centralized JWTConfig service for Access Token verification
+    const decoded = JWTConfig.verifyAccessToken(token); 
     req.user = decoded.id;
     next();
   } catch (err) {
-    res.status(401).json({ msg: 'Token is not valid' });
+    // Log detailed error to console, but send generic to client
+    console.error('Auth verification error:', err.message);
+    // Token is invalid (e.g., expired, wrong secret, wrong format)
+    res.status(401).json({ msg: 'Token is not valid or has expired' }); 
   }
 };

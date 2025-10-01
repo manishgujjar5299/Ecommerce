@@ -1,242 +1,215 @@
 const router = require('express').Router();
-const auth = require('../middleware/auth');
-const adminAuth = require('../middleware/adminAuth');
-const manufacturerAuth = require('../middleware/manufacturerAuth');
+const Product = require('../models/product.model');
+const auth = require('../middleware/auth'); // Basic user authentication
+const manufacturerAuth = require('../middleware/manufacturerAuth'); // Manufacturer/Admin auth
+const { validateProductData, validateObjectId } = require('../middleware/security'); // Validation/Security middleware
+const User = require('../models/user.model');
 
-let Product = require('../models/product.model');
-let User = require('../models/user.model');
+// --- PUBLIC ROUTES ---
 
-// --- GET ALL APPROVED PRODUCTS (Public Route) ---
-// This is the main shop page route. It only shows products that have been approved by the admin.
+// GET all approved products (Shop page)
 router.get('/', async (req, res) => {
-  try {
-    const products = await Product.find({ status: 'approved' }).populate('seller', 'name companyName');
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- GET A SINGLE PRODUCT BY ID (Public Route) ---
-router.get('/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id).populate('seller', 'name companyName');
-    if (product) {
-      res.json(product);
-    } else {
-      res.status(404).json({ msg: 'Product not found' });
+    try {
+        // Fetch only approved and active products
+        const products = await Product.findApproved().populate('seller', 'companyName name');
+        res.json(products);
+    } catch (error) {
+        console.error('Fetch all products error:', error);
+        res.status(500).json({ msg: 'Failed to fetch products' });
     }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 });
 
-// --- GET ALL PRODUCTS FOR ADMIN REVIEW (Protected Admin Route) ---
-// This route is for the admin dashboard to see all products, regardless of status.
-router.get('/admin/all-products', adminAuth, async (req, res) => {
-  try {
-    const products = await Product.find().populate('seller', 'name companyName');
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// GET a single product by ID (Product Detail page)
+router.get('/:id', validateObjectId('id'), async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id)
+            .populate('seller', 'companyName name role')
+            // Don't show password if user is populated in review
+            .populate('reviews.user', 'name profileImage'); 
 
-// --- GET PRODUCTS BY SELLER/MANUFACTURER (Protected Route) ---
-// This route is for the manufacturer dashboard to see only their own products.
-router.get('/user/my-products', auth, async (req, res) => {
-  try {
-    const myProducts = await Product.find({ seller: req.user }).populate('seller', 'name');
-    res.json(myProducts);
-  } catch (err) {
-    console.error('My products error:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
+        if (!product || product.status !== 'approved') {
+            return res.status(404).json({ msg: 'Product not found or is pending approval' });
+        }
+        
+        // Increment view count (optional: debounce this in a real app)
+        product.incrementViewCount();
 
-// --- ADD A NEW PRODUCT (Protected Manufacturer Route) ---
-// Only manufacturers can add products. Added a check for 'manufacturer' role.
-router.post('/add', auth, async (req, res) => {
-  try {
-    const { name, price, description, image, category, brand } = req.body;
-    
-    if (!name || !price || !description || !image || !category || !brand) {
-      return res.status(400).json({ msg: 'All fields are required.' });
+        res.json(product);
+    } catch (error) {
+        console.error('Fetch product by ID error:', error);
+        res.status(500).json({ msg: 'Failed to fetch product' });
     }
+});
 
-    const user = await User.findById(req.user);
-    if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+// --- MANUFACTURER / SELLER MANAGEMENT ROUTES ---
+
+// GET products belonging to the current user (My Products page)
+router.get('/my-products', manufacturerAuth, async (req, res) => {
+    try {
+        const products = await Product.find({ seller: req.user }).sort({ createdAt: -1 });
+        res.json(products);
+    } catch (error) {
+        console.error('Fetch user products error:', error);
+        res.status(500).json({ msg: 'Failed to fetch your products' });
     }
-    
-    // FIXED: Allow manufacturers to add products
-    const canAddProducts = user.role === 'admin' || 
-                          user.role === 'seller' || 
-                          (user.role === 'manufacturer' && user.verificationStatus === 'approved');
-    
-    if (!canAddProducts) {
-      if (user.role === 'manufacturer' && user.verificationStatus === 'pending') {
-        return res.status(403).json({ 
-          msg: 'Your manufacturer account is pending admin approval. Please wait for verification.' 
+});
+
+// POST Add a new product (The Fixed Logic is here)
+router.post('/add', manufacturerAuth, validateProductData, async (req, res) => {
+    try {
+        // Check if the user is verified to sell (handled by manufacturerAuth, but good to double-check)
+        const user = await User.findById(req.user);
+        if (!user.canSellProducts()) {
+            return res.status(403).json({ msg: 'Your account is not approved to add products.' });
+        }
+
+        const newProduct = new Product({
+            ...req.body,
+            seller: req.user,
+            // Status defaults to 'pending' unless user is an Admin/Approved Seller
+            status: user.role === 'admin' || user.role === 'seller' ? 'approved' : 'pending' 
         });
-      } else if (user.role === 'manufacturer' && user.verificationStatus === 'rejected') {
-        return res.status(403).json({ 
-          msg: 'Your manufacturer account has been rejected. Please contact admin.' 
+
+        await newProduct.save(); // Mongoose validation runs here
+
+        res.status(201).json({
+            msg: `Product added successfully and is currently ${newProduct.status}.`,
+            product: newProduct
         });
-      } else {
-        return res.status(403).json({ 
-          msg: 'Only approved sellers/manufacturers can add products' 
+
+    } catch (error) {
+        console.error('Product Save Error:', error);
+
+        // FIXED: Crucial: Handle Mongoose Validation Error
+        if (error.name === 'ValidationError') {
+            const errors = {};
+            for (const field in error.errors) {
+                // Return only the message for the frontend
+                errors[field] = error.errors[field].message; 
+            }
+            return res.status(400).json({
+                msg: 'Validation failed. Please check your product data.',
+                errors: errors // Send detailed field errors
+            });
+        }
+        
+        res.status(500).json({ msg: 'Internal server error while saving product' });
+    }
+});
+
+// PUT Update an existing product
+router.put('/update/:id', manufacturerAuth, validateObjectId('id'), validateProductData, async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({ msg: 'Product not found' });
+        }
+        // Ensure the current user is the owner
+        if (product.seller.toString() !== req.user.toString() && req.userRole !== 'admin') {
+            return res.status(403).json({ msg: 'You are not authorized to edit this product' });
+        }
+        
+        // Update fields
+        Object.assign(product, req.body);
+        
+        // If critical fields are changed, reset status to pending for re-approval (unless Admin)
+        if (req.userRole !== 'admin') {
+            product.status = 'pending';
+        }
+
+        await product.save();
+
+        res.json({
+            msg: `Product updated successfully. Status reset to ${product.status} for review.`,
+            product
         });
-      }
+    } catch (error) {
+        // Handle Mongoose Validation Errors on update as well
+        if (error.name === 'ValidationError') {
+            const errors = {};
+            for (const field in error.errors) {
+                errors[field] = error.errors[field].message; 
+            }
+            return res.status(400).json({
+                msg: 'Validation failed. Please check your updated data.',
+                errors: errors 
+            });
+        }
+        console.error('Product update error:', error);
+        res.status(500).json({ msg: 'Failed to update product' });
     }
-
-    // Set product status based on user role
-    let productStatus = 'pending'; // Default
-    if (user.role === 'admin') {
-      productStatus = 'approved'; // Admins can directly approve
-    }
-
-    const newProduct = new Product({
-      name,
-      price: Number(price),
-      description,
-      image,
-      category,
-      brand,
-      seller: req.user,
-      status: productStatus // Products are 'pending' by default and must be approved by admin.
-    });
-
-    const savedProduct = await newProduct.save();
-    const message = user.role === 'admin' 
-      ? 'Product added and approved successfully!' 
-      : 'Product added successfully! Awaiting admin approval.';
-
-
-    res.status(201).json({
-      msg: message,
-      product: savedProduct
-    });
-
-  } catch (err) {
-    console.error('Add product error:', err);
-    res.status(500).json({ error: err.message });
-  }
 });
 
-// --- CREATE A NEW REVIEW (Protected Route) ---
-router.post('/:id/reviews', auth, async (req, res) => {
-  const { rating, comment } = req.body;
-  try {
-    const product = await Product.findById(req.params.id);
+// DELETE a product
+router.delete('/:id', manufacturerAuth, validateObjectId('id'), async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
 
-    if (product) {
-      const alreadyReviewed = product.reviews.find((r) => r.user.toString() === req.user.toString());
+        if (!product) {
+            return res.status(404).json({ msg: 'Product not found' });
+        }
 
-      if (alreadyReviewed) {
-        return res.status(400).json({ msg: 'Product already reviewed' });
-      }
+        // Ensure the current user is the owner
+        if (product.seller.toString() !== req.user.toString() && req.userRole !== 'admin') {
+            return res.status(403).json({ msg: 'You are not authorized to delete this product' });
+        }
 
-      const user = await User.findById(req.user);
-      const review = {
-        name: user.name,
-        rating: Number(rating),
-        comment,
-        user: req.user,
-      };
+        await Product.deleteOne({ _id: req.params.id });
 
-      product.reviews.push(review);
-
-      // Update the number of reviews and overall rating
-      product.numReviews = product.reviews.length;
-      const totalRating = product.reviews.reduce((acc, item) => item.rating + acc, 0);
-      product.rating = totalRating / product.reviews.length;
-
-      await product.save();
-      res.status(201).json({ msg: 'Review added' });
-    } else {
-      res.status(404).json({ msg: 'Product not found' });
+        res.json({ msg: 'Product removed successfully' });
+    } catch (error) {
+        console.error('Product delete error:', error);
+        res.status(500).json({ msg: 'Failed to delete product' });
     }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- UPDATE PRODUCT (Protected Manufacturer Route) ---
-router.put('/update/:id', manufacturerAuth, async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    
-    if (!product) {
-      return res.status(404).json({ msg: 'Product not found' });
-    }
-
-     const user = await User.findById(req.user);
-    
-    // Check ownership or admin privileges
-    const canEdit = user.role === 'admin' || product.seller.toString() === req.user.toString();
-    
-    if (!canEdit) {
-      return res.status(403).json({ msg: 'Access denied. You can only update your own products.' });
-    }
-
-
-    // If manufacturer updates, set status back to pending (unless admin)
-    const updateData = { ...req.body };
-    if (user.role !== 'admin') {
-      updateData.status = 'pending';
-    }
-    // if (product.seller.toString() !== req.user.toString()) {
-    //   return res.status(403).json({ msg: 'Access denied. You can only update your own products.' });
-    // }
-
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      updateData, // Status reverts to pending on update, awaiting re-approval.
-      { new: true }
-    );
-
-    const message = user.role === 'admin' 
-      ? 'Product updated successfully!' 
-      : 'Product updated successfully! Awaiting re-approval.';
-
-    res.json({
-      msg: message,
-      product: updatedProduct
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- DELETE PRODUCT (Protected Manufacturer Route) ---
-router.delete('/:id', manufacturerAuth, async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    
-    if (!product) {
-      return res.status(404).json({ msg: 'Product not found' });
-    }
-
-    const user = await User.findById(req.user);
-    const canDelete = user.role === 'admin' || product.seller.toString() === req.user.toString();
-    
-    if (!canDelete) {
-      return res.status(403).json({ msg: 'Access denied. You can only delete your own products.' });
-    }
-
-    // if (product.seller.toString() !== req.user.toString()) {
-    //   return res.status(403).json({ msg: 'Access denied. You can only delete your own products.' });
-    // }
-
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ msg: 'Product deleted successfully!' });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 });
 
 
-module.exports = router;
+// --- REVIEW ROUTES (Requires basic user auth) ---
+
+// POST Add a review
+router.post('/:id/reviews', auth, validateObjectId('id'), async (req, res) => {
+    try {
+        const { rating, comment } = req.body;
+        const productId = req.params.id;
+
+        const submittingUser = await User.findById(req.user).select('name');
+        
+        if (!submittingUser) {
+          console.error(`User not found for ID: ${req.user}`); 
+            return res.status(401).json({ msg: 'User not found or unauthorized.' });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ msg: 'Product not found' });
+        }
+
+        const reviewData = {
+            name: submittingUser.name, // Assuming you fetch user name from a previous step or context
+            rating: Number(rating),
+            comment,
+            user: req.user // The ID from the token
+        };
+
+        // Use the method from product.model.js to handle adding and calculating stats
+        await product.addReview(reviewData);
+
+        res.status(201).json({ msg: 'Review added successfully' });
+
+    } catch (error) {
+        console.error('Add review error:', error);
+        // Handle custom error from addReview method (e.g., duplicate review)
+        if (error.message.includes('reviewed')) {
+             return res.status(400).json({ msg: error.message });
+        }
+        // Handle Mongoose validation errors for review fields
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ msg: 'Review validation failed: ' + Object.values(error.errors).map(e => e.message).join(', ') });
+        }
+        res.status(500).json({ msg: 'Failed to add review' });
+    }
+});
+
+
+module.exports = router;// Fixed products.js - Auto-approve products for verified manufacturers

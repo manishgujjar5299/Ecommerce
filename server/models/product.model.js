@@ -77,12 +77,23 @@ const productSchema = new Schema({
   image: { 
     type: String, 
     required: [true, 'Image is required'],
-    match: [/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i, 'Please enter a valid image URL']
+    validate: {
+      validator: function(url) {
+        // Check if it's a valid HTTP/HTTPS URL
+        try {
+          const urlObj = new URL(url);
+          return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+        } catch {
+          return false;
+        }
+      },
+      message: 'Please enter a valid HTTP/HTTPS URL'
+    }
   },
-  images: [{
-    type: String,
-    match: [/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i, 'Please enter valid image URLs']
-  }],
+  // images: [{
+  //   type: String,
+  //   match: [/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i, 'Please enter valid image URLs']
+  // }],
   category: { 
     type: String, 
     required: [true, 'Category is required'],

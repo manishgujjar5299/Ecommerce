@@ -11,8 +11,8 @@ const manufacturerAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
     
-    if (!user || (user.role !== 'manufacturer' && user.role !== 'admin')) {
-      return res.status(403).json({ msg: 'Manufacturer access required' });
+     if (!user || !user.canSellProducts()) { 
+      return res.status(403).json({ msg: 'Manufacturer or Admin access required (and must be approved)' });
     }
 
     req.user = decoded.id;
