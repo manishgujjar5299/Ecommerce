@@ -6,6 +6,7 @@ import Modal from '../components/Modal';
 import { CartContext } from '../context/CartContext';
 import HeroSlider from '../components/HeroSlider';
 import FeaturesBar from '../components/FeaturesBar';
+import { Helmet  } from 'react-helmet-async';
 import './HomePage.css';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'; 
 
@@ -94,6 +95,12 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
+       {/* Static SEO Tags for Homepage */}
+      <Helmet>
+        <title>PressMart - Manufacturer-Direct E-commerce Marketplace</title>
+        <meta name="description" content="Shop verified manufacturer products direct. Find the best deals on Electronics, Apparel, and Home Goods with secure payment and fast shipping." />
+        <link rel="canonical" href="https://press-mart1.netlify.app/" /> 
+      </Helmet>
       <HeroSlider />
       <FeaturesBar />
 

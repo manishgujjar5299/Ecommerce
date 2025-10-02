@@ -5,6 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import Modal from '../components/Modal';
 import { CartContext } from '../context/CartContext';
+import { Helmet } from 'react-helmet-async';
 import './ShopPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'; 
@@ -167,6 +168,12 @@ const ShopPage = () => {
 
   return (
     <div className="shop-page container">
+      {/* Static SEO Tags for ShopPage */}
+      <Helmet>
+        <title>Shop All Products & Categories | Best Prices | PressMart</title>
+        <meta name="description" content="Browse our full catalog of Electronics, Apparel, Shoes, and more. Use our advanced filters to find the best deals on PressMart." />
+        <link rel="canonical" href="https://press-mart1.netlify.app/shop" /> 
+      </Helmet>
       <div className="page-header">
         <h1>Shop All Products</h1>
         {urlSearchTerm && (

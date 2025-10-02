@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import {Link, useParams, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
+import { Helmet } from 'react-helmet-async';
 import './ProductDetailPage.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -81,8 +82,22 @@ const ProductDetailPage = () => {
     return <div className="container"><p>Product not found.</p></div>;
   }
 
+  const canonicalUrl = `https://press-mart1.netlify.app/product/${product._id}`;
+
   return (
     <div className="product-detail-page container">
+      <Helmet>
+        <title>{product.name} | {product.brand} | PressMart</title>
+        <meta 
+          name="description" 
+          content={product.description.substring(0, 160) + '... Buy now with secure payment and fast shipping.'} 
+        />
+        <meta 
+          name="keywords" 
+          content={`buy ${product.name}, ${product.brand}, ${product.category}, e-commerce, pressmart`} 
+        />
+        <link rel="canonical" href={canonicalUrl} />
+      </Helmet>
       <div className="product-detail-main">
         <div className="product-detail-image">
           <img src={product.image} alt={product.name} />
