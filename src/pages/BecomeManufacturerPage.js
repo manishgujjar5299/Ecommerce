@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import './BecomeManufacturerPage.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const BecomeManufacturerPage = () => {
   const [formData, setFormData] = useState({
     companyName: '',
@@ -39,7 +41,7 @@ const BecomeManufacturerPage = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/users/become-manufacturer', {
+      const response = await fetch(`${API_URL}/users/become-manufacturer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
