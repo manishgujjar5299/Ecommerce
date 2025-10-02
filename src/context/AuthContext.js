@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 export const AuthContext = createContext();
 
 // FIXED: Define the base API URL using an environment variable
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'; 
+const API_URL = process.env.REACT_APP_API_URL ; 
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
