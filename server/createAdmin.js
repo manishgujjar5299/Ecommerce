@@ -1,3 +1,5 @@
+// createAdmin.js
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
@@ -6,21 +8,35 @@ const User = require('./models/user.model');
 
 const createAdmin = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    // 1. Connect using the live URI (from your local .env file)
+    await mongoose.connect(process.env.MONGO_URI); 
     console.log("Connected to MongoDB");
 
-    const existingAdmin = await User.findOne({ email: 'admin@pressmart.com' });
+    const email = 'admin@pressmart.com';
+    const password = 'admin123';
+    
+    // 2. Hash the standard password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 3. Find existing admin
+    let existingAdmin = await User.findOne({ email: email });
+
     if (existingAdmin) {
-      console.log('Admin already exists!');
+      // FIXED: If admin exists, only update the password and crucial fields
+      existingAdmin.password = hashedPassword;
+      existingAdmin.role = 'admin'; // Ensure role is correct
+      existingAdmin.isSeller = true;
+      
+      await existingAdmin.save();
+      console.log('Admin already exists! Password RESET successfully to: admin123');
       process.exit(0);
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('admin123', salt);
-
+    // 4. If admin does NOT exist, create the new user
     const adminUser = new User({
       name: 'Admin User',
-      email: 'admin@pressmart.com',
+      email: email,
       password: hashedPassword,
       role: 'admin',
       isSeller: true
@@ -28,8 +44,8 @@ const createAdmin = async () => {
 
     await adminUser.save();
     console.log('Admin user created successfully!');
-    console.log('Email: admin@pressmart.com');
-    console.log('Password: admin123');
+    console.log(`Email: ${email}`);
+    console.log(`Password: ${password}`);
     
     process.exit(0);
   } catch (error) {

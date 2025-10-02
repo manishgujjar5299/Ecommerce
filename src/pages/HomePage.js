@@ -7,6 +7,7 @@ import { CartContext } from '../context/CartContext';
 import HeroSlider from '../components/HeroSlider';
 import FeaturesBar from '../components/FeaturesBar';
 import './HomePage.css';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'; 
 
 const HomePage = () => {
   const [allProducts, setAllProducts] = useState([]);
@@ -33,7 +34,7 @@ const HomePage = () => {
       try {
         setLoading(true);
         setError('');
-        const response = await fetch('http://localhost:5000/api/products');
+        const response = await fetch(`${API_URL}/products`);
       
         if (!response.ok) {
           throw new Error('Failed to fetch products');
