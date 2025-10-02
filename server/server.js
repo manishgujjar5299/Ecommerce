@@ -20,21 +20,19 @@ app.use(generalLimiter);
 app.use(sanitizeInput);
 app.use(preventInjection);
 
-
+const LIVE_FRONTEND_URL = 'https://press-mart1.netlify.app';
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()) 
-  : ['http://localhost:3000', 'http://localhost:3001']; // Default for dev
+  : ['http://localhost:3000', 'http://localhost:3001', LIVE_FRONTEND_URL]; // Default for dev
 
 // CORS configuration
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin || allowedOrigins.includes(origin)|| origin === LIVE_FRONTEND_URL)callback(null, true);
     
-    // Check if the requesting origin is in our allowed list
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
+    else {
+      console.error(`CORS BLOCKED: ${origin}`);
       callback(new Error(`Not allowed by CORS policy: ${origin}`));
     }
   },
