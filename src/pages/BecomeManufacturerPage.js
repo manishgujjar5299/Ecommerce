@@ -10,7 +10,7 @@ const BecomeManufacturerPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const { token, login } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const validateForm = () => {
