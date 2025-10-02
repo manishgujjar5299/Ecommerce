@@ -20,18 +20,24 @@ app.use(generalLimiter);
 app.use(sanitizeInput);
 app.use(preventInjection);
 
+// Include the stable domain and the long temporary domain pattern
 const LIVE_FRONTEND_URL = 'https://press-mart1.netlify.app';
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()) 
-  : ['http://localhost:3000', 'http://localhost:3001', LIVE_FRONTEND_URL]; // Default for dev
 
-// CORS configuration
+// The second domain pattern is needed because Netlify sometimes sends the Deploy ID URL.
+const allowedOrigins = [
+  'http://localhost:3000', 
+  LIVE_FRONTEND_URL, 
+  // Allow all temporary deploy URLs from the same Netlify subdomain
+  /https:\/\/\S*--press-mart1\.netlify\.app$/ 
+];
+
+// CORS configuration (Only need to update the definition of origin in corsOptions)
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.includes(origin)|| origin === LIVE_FRONTEND_URL)callback(null, true);
-    
-    else {
+    // Check if the origin matches the stable URL or the regex pattern
+    if (!origin || allowedOrigins.includes(origin) || allowedOrigins[2].test(origin)) {
+      callback(null, true);
+    } else {
       console.error(`CORS BLOCKED: ${origin}`);
       callback(new Error(`Not allowed by CORS policy: ${origin}`));
     }
